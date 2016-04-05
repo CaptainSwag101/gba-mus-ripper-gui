@@ -8,5 +8,6 @@ INPUT(
 ./debug\sf2.o
 ./debug\song_ripper.o
 ./debug\sound_font_ripper.o
+./debug\sappy_detector.o
 ./debug\moc_mainwindow.o
 );

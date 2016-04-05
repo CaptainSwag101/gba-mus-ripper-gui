@@ -538,19 +538,19 @@ static void process_event(int track)
 	}
 }
 
-static uint32_t parseArguments(const int argv, const char *const args[])
+static uint32_t parseArguments(const int argv, const char *args[])
 {
-	if (argv < 3) print_instructions();
+    if (argv < 3) print_instructions();
 
 	// Open the input and output files
-	inGBA = fopen(args[0], "rb");
+    inGBA = fopen(args[0], "rb");
 	if(!inGBA)
 	{
-		fprintf(stderr, "Can't open file %s for reading.\n", args[0]);
+        fprintf(stderr, "Can't open file %s for reading.\n", args[0]);
 		exit(0);
 	}
 
-	for(int i=3; i<argv; i++)
+    for(int i=3; i<argv; i++)
 	{
 		if(args[i][0] == '-')
 		{
@@ -580,11 +580,11 @@ static uint32_t parseArguments(const int argv, const char *const args[])
 	return strtoul(args[2], 0, 0);
 }
 
-int ripSong(int argc, char *argv[])
+int ripSong(int argc, const char *argv[])
 {
 	FILE *outMID;
-	puts("GBA ROM sequence ripper (c) 2012 Bregalad");
-	uint32_t base_address = parseArguments(argc-1, argv+1);
+    puts("GBA ROM sequence ripper (c) 2012 Bregalad");
+    uint32_t base_address = parseArguments(argc-1, argv);
 
 	if(fseek(inGBA, base_address, SEEK_SET))
 	{
@@ -602,10 +602,10 @@ int ripSong(int argc, char *argv[])
 
 	// Open output file once we know the pointer points to correct data
 	//(this avoids creating blank files when there is an error)
-	outMID = fopen(argv[2], "wb");
+    outMID = fopen(argv[2], "wb");
 	if(!outMID)
 	{
-		fprintf(stderr, "Can't write on file %s\n", argv[2]);
+        fprintf(stderr, "Can't write on file %s\n", argv[2]);
 		exit(0);
 	}
 

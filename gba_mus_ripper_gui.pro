@@ -22,7 +22,8 @@ SOURCES += main.cpp\
     midi.cpp \
     sf2.cpp \
     song_ripper.cpp \
-    sound_font_ripper.cpp
+    sound_font_ripper.cpp \
+    sappy_detector.cpp
 
 HEADERS  += mainwindow.h \
     gba_instr.hpp \
@@ -34,7 +35,8 @@ HEADERS  += mainwindow.h \
     sf2_types.hpp \
     gba_mus_ripper.h \
     sound_font_ripper.h \
-    song_ripper.h
+    song_ripper.h \
+    sappy_detector.h
 
 FORMS    += mainwindow.ui
 

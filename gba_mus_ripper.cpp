@@ -15,6 +15,8 @@
 #include <vector>
 #include <set>
 #include "hex_string.hpp"
+#include "sappy_detector.h"
+#include "song_ripper.h"
 #include <QDir>
 
 #ifndef WIN32
@@ -83,16 +85,15 @@ static std::string dec3(unsigned int n)
 	return s;
 }
 
-static void parse_args(const int argc, std::string argx[])
+static void parse_args(const int argc, const char * args[])
 {
 	if(argc < 1) print_instructions();
 
     bool path_found = false, song_tbl_found = false;
 
-    const char * args[argc];
+
     for(int i = 0; i < argc; i++)
     {
-        args[i] = argx[i].c_str();
 		if(args[i][0] == '-')
 		{
             if(!strcmp(args[i], "--help") || !strcmp(args[i], "-h"))
@@ -157,8 +158,14 @@ static void parse_args(const int argc, std::string argx[])
 	}
 }
 
-int musRip(int argc, std::string argv[])
+int musRip(int argc, std::string args[])
 {
+    const char * argv[argc];
+    for(int i = 0; i < argc; i++)
+    {
+        argv[i] = args[i].c_str();
+    }
+
 	// Parse arguments (without program name)
     parse_args(argc-1, argv+1);
 
@@ -173,10 +180,10 @@ int musRip(int argc, std::string argv[])
 #ifdef WIN32
 		// On windows, just use the 32-bit return code of the sappy_detector executable
         std::string sappy_detector_cmd;
-        sappy_detector_cmd = prg_prefix + "sappy_detector \"" + inGBA_path + '"';
-        printf(sappy_detector_cmd.c_str());
-        printf("\n");
-        int sound_engine_adr = std::system(sappy_detector_cmd.c_str());
+        sappy_detector_cmd = inGBA_path;
+        //printf(sappy_detector_cmd.c_str());
+        //printf("\n");
+        int sound_engine_adr = sappy_detect(sappy_detector_cmd);
 #else
 		// On linux the function is duplicated in this executable
 		const char *sappy_detector_argv1 = inGBA_path.c_str();
@@ -297,29 +304,87 @@ int musRip(int argc, std::string argv[])
 	{
 		if(song_list[i] != song_tbl_end_ptr)
 		{
-			unsigned int bank_index = distance(sound_bank_list.begin(), sound_bank_index_list[i]);
-            std::string seq_rip_cmd;
-            seq_rip_cmd = prg_prefix + "song_ripper \"" + inGBA_path + "\" \"" + name;
+//			unsigned int bank_index = distance(sound_bank_list.begin(), sound_bank_index_list[i]);
+//            std::string seq_rip_cmd;
+//            seq_rip_cmd = inGBA_path + "\" \"" + name;
 
-			// Add leading zeroes to file name
-			if(sb) seq_rip_cmd += "/soundbank_" + dec3(bank_index);
-			seq_rip_cmd += "/song" + dec3(i) + ".mid\"";
+//			// Add leading zeroes to file name
+//            if(sb) seq_rip_cmd += "/soundbank_" + dec3(bank_index);
+//            seq_rip_cmd += "/song" + dec3(i) + ".mid\"";
 
-			seq_rip_cmd += " 0x" + hex(song_list[i]);
-			seq_rip_cmd += rc ? " -rc" : (xg ? " -xg" : " -gs");
-			if(!raw)
-			{
-				seq_rip_cmd += " -sv";
-				seq_rip_cmd += " -lv";
-			}
-			// Bank number, if banks are not separated
-			if(!sb)
-				seq_rip_cmd += " -b" + std::to_string(bank_index);
+//            seq_rip_cmd += " 0x" + hex(song_list[i]);
+//            seq_rip_cmd += rc ? " -rc" : (xg ? " -xg" : " -gs");
+//			if(!raw)
+//			{
+//                seq_rip_cmd += " -sv";
+//                seq_rip_cmd += " -lv";
+//			}
+//			// Bank number, if banks are not separated
+//			if(!sb)
+//                seq_rip_cmd += " -b" + std::to_string(bank_index);
 
-			printf("Song %u\n", i);
+//            printf("Song %u\n", i);
 			
+//// 			printf("DEBUG : Going to call system(%s)\n", seq_rip_cmd.c_str());
+//            if(!ripSong(string)) puts("An error has occured.");
+
+            unsigned int bank_index = distance(sound_bank_list.begin(), sound_bank_index_list[i]);
+            std::string seq_rip_cmd = "";
+            std::string seq_rip_args[song_list.size()];
+
+            seq_rip_args[0] = inGBA_path;
+            seq_rip_args[1] = name + '/';
+
+            // Add leading zeroes to file name
+            if(sb) seq_rip_cmd += "/soundbank_" + dec3(bank_index);
+            seq_rip_cmd += "/song" + dec3(i) + ".mid";
+
+            seq_rip_cmd += " 0x" + hex(song_list[i]);
+            seq_rip_cmd += rc ? " -rc" : (xg ? " -xg" : " -gs");
+            if(!raw)
+            {
+                seq_rip_cmd += " -sv";
+                seq_rip_cmd += " -lv";
+            }
+            // Bank number, if banks are not separated
+            if(!sb)
+                seq_rip_cmd += " -b" + std::to_string(bank_index);
+
+            printf("Song %u\n", i);
+
+            std::string search = " ";
+            int spacePos;
+            int currPos = 0;
+            int k = 2;
+            int prevPos = 0;
+
+            do {
+
+                spacePos = seq_rip_cmd.find(search,currPos);
+
+                if(spacePos >= 0)
+                {
+
+                    currPos = spacePos;
+                    seq_rip_args[k] = seq_rip_cmd.substr(prevPos, currPos - prevPos);
+                    currPos++;
+                    prevPos = currPos;
+                    k++;
+                }
+
+
+            } while (spacePos >= 0);
+
+            seq_rip_args[k] = seq_rip_cmd.substr(prevPos, seq_rip_cmd.length());
+
+            const char *argx[k];
+            for (int w = 0; w < k; w++)
+            {
+                argx[w] = seq_rip_args[w].c_str();
+            }
+
 // 			printf("DEBUG : Going to call system(%s)\n", seq_rip_cmd.c_str());
-			if(!system(seq_rip_cmd.c_str())) puts("An error has occured.");
+            if(!ripSong(song_list.size(), argx)) puts("An error has occured.");
 		}
 	}
 	delete[] sound_bank_index_list;
@@ -367,4 +432,213 @@ int musRip(int argc, std::string argv[])
 	}
 	puts("Rip completed !");
 	return 0;
+}
+
+typedef enum {
+    STR2AV_OK       = 0,
+    STR2AV_UNBALANCED_QUOTE
+} str_to_argv_err_t;
+
+#ifndef NUL
+#define NUL '\0'
+#endif
+
+static char const nomem[] = "no memory for %d byte allocation\n";
+
+static str_to_argv_err_t
+copy_raw_string(char ** dest_p, char ** src_p);
+
+static str_to_argv_err_t
+copy_cooked_string(char ** dest_p, char ** src_p);
+
+static inline void *
+Xmalloc(size_t sz)
+{
+    void * res = malloc(sz);
+    if (res == NULL) {
+        fprintf(stderr, nomem, sz);
+        exit(EXIT_FAILURE);
+    }
+    return res;
+}
+
+static inline void *
+Xrealloc(void * ptr, size_t sz)
+{
+    void * res = realloc(ptr, sz);
+    if (res == NULL) {
+        fprintf(stderr, nomem, sz);
+        exit(EXIT_FAILURE);
+    }
+    return res;
+}
+
+str_to_argv_err_t
+string_to_argv(char const * str, int * argc_p, char *** argv_p)
+{
+    int     argc = 0;
+    int     act  = 10;
+    char ** res  = (char**)Xmalloc(sizeof(char *) * 10);
+    char ** argv = res;
+    char *  scan;
+    char *  dest;
+    str_to_argv_err_t err;
+
+    while (isspace((unsigned char)*str))  str++;
+    str = scan = strdup(str);
+
+    for (;;) {
+        while (isspace((unsigned char)*scan))  scan++;
+        if (*scan == NUL)
+            break;
+
+        if (++argc >= act) {
+            act += act / 2;
+            res  = (char**)Xrealloc(res, act * sizeof(char *));
+            argv = res + (argc - 1);
+        }
+
+        *(argv++) = dest = scan;
+
+        for (;;) {
+            char ch = *(scan++);
+            switch (ch) {
+            case NUL:
+                goto done;
+
+            case '\\':
+                if ( (*(dest++) = *(scan++)) == NUL)
+                    goto done;
+                break;
+
+            case '\'':
+                err = copy_raw_string(&dest, &scan);
+                if (err != STR2AV_OK)
+                    goto error_leave;
+                break;
+
+            case '"':
+                err = copy_cooked_string(&dest, &scan);
+                if (err != STR2AV_OK)
+                    goto error_leave;
+                break;
+
+            case ' ':
+            case '\t':
+            case '\n':
+            case '\f':
+            case '\r':
+            case '\v':
+            case '\b':
+                goto token_done;
+
+            default:
+                *(dest++) = ch;
+            }
+        }
+
+    token_done:
+        *dest = NUL;
+    }
+
+done:
+
+    *argv_p = res;
+    *argc_p = argc;
+    *argv   = NULL;
+    if (argc == 0)
+        free((void *)str);
+
+    return STR2AV_OK;
+
+error_leave:
+
+    free(res);
+    free((void *)str);
+    return err;
+}
+
+static str_to_argv_err_t
+copy_raw_string(char ** dest_p, char ** src_p)
+{
+    for (;;) {
+        char ch = *((*src_p)++);
+
+        switch (ch) {
+        case NUL: return STR2AV_UNBALANCED_QUOTE;
+        case '\'':
+            *(*dest_p) = NUL;
+            return STR2AV_OK;
+
+        case '\\':
+            ch = *((*src_p)++);
+            switch (ch) {
+            case NUL:
+                return STR2AV_UNBALANCED_QUOTE;
+
+            default:
+                /*
+                 * unknown/invalid escape.  Copy escape character.
+                 */
+                *((*dest_p)++) = '\\';
+                break;
+
+            case '\\':
+            case '\'':
+                break;
+            }
+            /* FALLTHROUGH */
+
+        default:
+            *((*dest_p)++) = ch;
+            break;
+        }
+    }
+}
+
+static char
+escape_convt(char ** src_p)
+{
+    char ch = *((*src_p)++);
+
+    /*
+     *  Escape character is always eaten.  The next character is sometimes
+     *  treated specially.
+     */
+    switch (ch) {
+    case 'a': ch = '\a'; break;
+    case 'b': ch = '\b'; break;
+    case 't': ch = '\t'; break;
+    case 'n': ch = '\n'; break;
+    case 'v': ch = '\v'; break;
+    case 'f': ch = '\f'; break;
+    case 'r': ch = '\r'; break;
+    }
+
+    return ch;
+}
+
+
+static str_to_argv_err_t
+copy_cooked_string(char ** dest_p, char ** src_p)
+{
+    for (;;) {
+        char ch = *((*src_p)++);
+        switch (ch) {
+        case NUL: return STR2AV_UNBALANCED_QUOTE;
+        case '"':
+            *(*dest_p) = NUL;
+            return STR2AV_OK;
+
+        case '\\':
+            ch = escape_convt(src_p);
+            if (ch == NUL)
+                return STR2AV_UNBALANCED_QUOTE;
+            /* FALLTHROUGH */
+
+        default:
+            *((*dest_p)++) = ch;
+            break;
+        }
+    }
 }
