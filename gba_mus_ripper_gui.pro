@@ -10,7 +10,7 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = gba_mus_ripper_gui
 TEMPLATE = app
-CONFIG += -static
+CONFIG += static console
 QMAKE_LFLAGS += -static
 
 

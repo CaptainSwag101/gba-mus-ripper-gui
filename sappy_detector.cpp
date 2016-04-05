@@ -2,7 +2,7 @@
  * GBA Sappy Engine Detector (c) 2012, 2014 by Bregalad
  * This is free and open source software
  * 
- * This programs detects if a snappy sound engine is present in a given GBA ROM.
+ * This program detects if a snappy sound engine is present in a given GBA ROM.
  * If an engine is present it returns a pointer to the instrument list.
  * If no engine is present, it returns the value 0
  * It's not 100% accurate, so sometimes it might produce erroneous results
@@ -252,7 +252,7 @@ int sappy_detect(std::string romFile)
 	if(!inGBA)
 	{
         fprintf(stderr, "Error : File %s can't be opened for reading.\n", romFile.c_str());
-		exit(0);
+        return(0);
 	}
 
 	/* Get the size of the input GBA file */
@@ -263,7 +263,7 @@ int sappy_detect(std::string romFile)
 	if(!inGBA_dump)
 	{
 		fprintf(stderr, "Error, can't allocate memory for ROM dump.\n");
-		exit(0);
+        return(0);
 	}
 
 	fseek(inGBA, 0L, SEEK_SET);
@@ -271,7 +271,7 @@ int sappy_detect(std::string romFile)
 	if(errcode != inGBA_length)
 	{
 		fprintf(stderr, "Error, can't dump ROM file. %x\n", errcode);
-		exit(0);
+        return(0);
 	}
 	fclose(inGBA);
 
@@ -281,7 +281,7 @@ int sappy_detect(std::string romFile)
 	{
 		/* If no address were told manually and nothing was detected.... */
 		puts("No sound engine was found.");
-		exit(0);
+        return(0);
 	}
 	printf("Sound engine detected at offset 0x%x\n", offset);
 
@@ -293,7 +293,7 @@ int sappy_detect(std::string romFile)
 	if(!valid_m16 && !valid_m32)
 	{
 		puts("Only a partial sound engine was found.");
-		exit(0);
+        return(0);
 	}
 	offset -= valid_m16 ? 16 : 32;
 

@@ -40,7 +40,7 @@ static uint32_t song_tbl_ptr = 0;
 
 static const int sample_rates[] = {-1, 5734, 7884, 10512, 13379, 15768, 18157, 21024, 26758, 31536, 36314, 40137, 42048};
 
-static void print_instructions()
+static int print_instructions()
 {
 	puts(
         "  /=================================================================\\\n"
@@ -60,7 +60,7 @@ static void print_instructions()
 		"-adr : Force adress of the song table manually. This is required for manually dumping music data\n"
 		"       from ROMs where the location can't be detected automatically.\n"
 	);
-	exit(0);
+    return(0);
 }
 
 static uint32_t get_GBA_pointer()
@@ -85,7 +85,7 @@ static std::string dec3(unsigned int n)
 	return s;
 }
 
-static void parse_args(const int argc, const char * args[])
+static int parse_args(const int argc, const char * args[])
 {
 	if(argc < 1) print_instructions();
 
@@ -111,7 +111,7 @@ static void parse_args(const int argc, const char * args[])
 			else
 			{
                 fprintf(stderr, "Error : Unknown command line option : %s. Try with --help or -h to get information.\n", args[i]);
-				exit(-1);
+                return(-1);
 			}
 		}
 		// Convert given address to binary, use it instead of automatically detected one
@@ -122,7 +122,7 @@ static void parse_args(const int argc, const char * args[])
 			if(!inGBA)
 			{
 				fprintf(stderr, "Error : Can't open file %s for reading.\n", args[i]);
-				exit(-1);
+                return(-1);
 			}
 
 			// Name is filename without the extention and without path
@@ -141,21 +141,22 @@ static void parse_args(const int argc, const char * args[])
 			if(errno)
 			{
 				fprintf(stderr, "Error : %s is not a valid song table address.\n", args[i]);
-				exit(-1);
+                return(-1);
 			}
 			song_tbl_found = true;
 		}
 		else
 		{
 			fprintf(stderr, "Error : Don't know what to do with %s. Try with -help to get more information.\n", args[i]);
-			exit(-1);
+            return(-1);
 		}
 	}
 	if(!path_found)
 	{
 		fputs("Error : No input GBA file. Try with -help to get more information.\n", stderr);
-		exit(-1);
+        return(-1);
 	}
+    return(0);
 }
 
 int musRip(int argc, std::string args[])
@@ -190,13 +191,13 @@ int musRip(int argc, std::string args[])
 		int sound_engine_adr = sappy_detector::main(2, &sappy_detector_argv1 - 1);
 #endif
 
-		// Exit if no sappy engine was found
-		if(!sound_engine_adr) exit(0);
+        // Return if no sappy engine was found
+        if(!sound_engine_adr) return(0);
 
 		if(fseek(inGBA, sound_engine_adr, SEEK_SET))
 		{
 			fprintf(stderr, "Error : Invalid offset within input GBA file : 0x%x\n", sound_engine_adr);
-			exit(0);
+            return(0);
 		}
 
 		// Engine parameter's word
@@ -224,7 +225,7 @@ int musRip(int argc, std::string args[])
 	if(song_tbl_ptr >= inGBA_size)
 	{
 		fprintf(stderr, "Fatal error : Song table at 0x%x is past the end of the file.\n", song_tbl_ptr);
-		exit(0);
+        return(0);
 	}
 
 	printf("Parsing song table...");
@@ -236,7 +237,7 @@ int musRip(int argc, std::string args[])
 	if(fseek(inGBA, song_tbl_ptr, SEEK_SET))
 	{
 		fprintf(stderr, "Fatal error : Can't seek to song table at : 0x%x\n", song_tbl_ptr);
-		exit(0);
+        return(0);
 	}
 
 	// Ignores entries which are made of 0s at the start of the song table
@@ -257,7 +258,10 @@ int musRip(int argc, std::string args[])
 		// Stop as soon as we met with an invalid pointer
 		if(song_pointer == 0 || song_pointer >= inGBA_size) break;
 
-		for(int j=4; j!=0; --j) fgetc(inGBA);		// Discard 4 bytes (sound group)
+        for(int j=4; j!=0; --j)
+        {
+            fgetc(inGBA);		// Discard 4 bytes (sound group)
+        }
 		song_list.push_back(song_pointer);			// Add pointer to list
 		i++;
 		fread(&song_pointer, 4, 1, inGBA);
@@ -265,7 +269,7 @@ int musRip(int argc, std::string args[])
 	// As soon as data that is not a valid pointer is found, the song table is terminated
 
 	// End of song table
-	uint32_t song_tbl_end_ptr = 8*i + song_tbl_ptr;
+    uint32_t song_tbl_end_ptr = 8 * i + song_tbl_ptr;
 
 	puts("Collecting sound bank list...");
 
@@ -300,91 +304,76 @@ int musRip(int argc, std::string args[])
 		}
 	}
 
-	for(i=0; i < song_list.size(); i++)
+    for(i = 0; i < song_list.size(); i++)
 	{
 		if(song_list[i] != song_tbl_end_ptr)
-		{
-//			unsigned int bank_index = distance(sound_bank_list.begin(), sound_bank_index_list[i]);
-//            std::string seq_rip_cmd;
-//            seq_rip_cmd = inGBA_path + "\" \"" + name;
+        {
+//            unsigned int bank_index = distance(sound_bank_list.begin(), sound_bank_index_list[i]);
+//            std::string seq_rip_cmd = prg_prefix + "song_ripper.exe \"" + inGBA_path + "\" \"" + name;
 
-//			// Add leading zeroes to file name
+//            // Add leading zeroes to file name
 //            if(sb) seq_rip_cmd += "/soundbank_" + dec3(bank_index);
 //            seq_rip_cmd += "/song" + dec3(i) + ".mid\"";
 
 //            seq_rip_cmd += " 0x" + hex(song_list[i]);
 //            seq_rip_cmd += rc ? " -rc" : (xg ? " -xg" : " -gs");
-//			if(!raw)
-//			{
+//            if(!raw)
+//            {
 //                seq_rip_cmd += " -sv";
 //                seq_rip_cmd += " -lv";
-//			}
-//			// Bank number, if banks are not separated
-//			if(!sb)
+//            }
+//            // Bank number, if banks are not separated
+//            if(!sb)
 //                seq_rip_cmd += " -b" + std::to_string(bank_index);
 
 //            printf("Song %u\n", i);
-			
-//// 			printf("DEBUG : Going to call system(%s)\n", seq_rip_cmd.c_str());
-//            if(!ripSong(string)) puts("An error has occured.");
+
+//            printf("DEBUG : Going to call system(%s)\n", seq_rip_cmd.c_str());
+//            if(!system(seq_rip_cmd.c_str())) puts("An error has occured.");
 
             unsigned int bank_index = distance(sound_bank_list.begin(), sound_bank_index_list[i]);
-            std::string seq_rip_cmd = "";
-            std::string seq_rip_args[song_list.size()];
+            std::string seq_rip_args[8];
 
-            seq_rip_args[0] = inGBA_path;
-            seq_rip_args[1] = name + '/';
+            int k = 4;
+            seq_rip_args[0] = prg_prefix + "song_ripper";
+            seq_rip_args[1] = inGBA_path;
+            seq_rip_args[2] += name;
 
             // Add leading zeroes to file name
-            if(sb) seq_rip_cmd += "/soundbank_" + dec3(bank_index);
-            seq_rip_cmd += "/song" + dec3(i) + ".mid";
+            if(sb)
+                seq_rip_args[2] += "\\soundbank_" + dec3(bank_index);
 
-            seq_rip_cmd += " 0x" + hex(song_list[i]);
-            seq_rip_cmd += rc ? " -rc" : (xg ? " -xg" : " -gs");
+            seq_rip_args[2] += "\\song" + dec3(i) + ".mid";
+
+            seq_rip_args[3] += "0x" + hex(song_list[i]);
+            seq_rip_args[4] += rc ? "-rc" : (xg ? "-xg" : "-gs");
             if(!raw)
             {
-                seq_rip_cmd += " -sv";
-                seq_rip_cmd += " -lv";
+                seq_rip_args[5] += "-sv";
+                seq_rip_args[6] += "-lv";
+                k += 2;
             }
             // Bank number, if banks are not separated
             if(!sb)
-                seq_rip_cmd += " -b" + std::to_string(bank_index);
+            {
+                seq_rip_args[7] += "-b" + std::to_string(bank_index);
+                k++;
+            }
 
             printf("Song %u\n", i);
 
-            std::string search = " ";
-            int spacePos;
-            int currPos = 0;
-            int k = 2;
-            int prevPos = 0;
+            std::string seq_rip_cmd = seq_rip_args[0];
 
-            do {
-
-                spacePos = seq_rip_cmd.find(search,currPos);
-
-                if(spacePos >= 0)
-                {
-
-                    currPos = spacePos;
-                    seq_rip_args[k] = seq_rip_cmd.substr(prevPos, currPos - prevPos);
-                    currPos++;
-                    prevPos = currPos;
-                    k++;
-                }
-
-
-            } while (spacePos >= 0);
-
-            seq_rip_args[k] = seq_rip_cmd.substr(prevPos, seq_rip_cmd.length());
-
-            const char *argx[k];
-            for (int w = 0; w < k; w++)
+            for (int w = 1; w < k; w++)
             {
-                argx[w] = seq_rip_args[w].c_str();
+                seq_rip_cmd += " ";
+                seq_rip_cmd += seq_rip_args[w];
             }
 
-// 			printf("DEBUG : Going to call system(%s)\n", seq_rip_cmd.c_str());
-            if(!ripSong(song_list.size(), argx)) puts("An error has occured.");
+            printf("DEBUG : Going to call system(%s)\n", seq_rip_cmd.c_str());
+
+            if(ripSong(k, seq_rip_args) <= 0)
+                printf("An error has occured.");
 		}
 	}
 	delete[] sound_bank_index_list;
@@ -392,7 +381,7 @@ int musRip(int argc, std::string args[])
 	if(sb)
 	{
 		// Rips each sound bank in a different file/folder
-		for(bank_t j=sound_bank_list.begin(); j!=sound_bank_list.end(); ++j)
+        for(bank_t j = sound_bank_list.begin(); j != sound_bank_list.end(); ++j)
 		{
 			unsigned int bank_index = distance(sound_bank_list.begin(), j);
 
@@ -432,213 +421,4 @@ int musRip(int argc, std::string args[])
 	}
 	puts("Rip completed !");
 	return 0;
-}
-
-typedef enum {
-    STR2AV_OK       = 0,
-    STR2AV_UNBALANCED_QUOTE
-} str_to_argv_err_t;
-
-#ifndef NUL
-#define NUL '\0'
-#endif
-
-static char const nomem[] = "no memory for %d byte allocation\n";
-
-static str_to_argv_err_t
-copy_raw_string(char ** dest_p, char ** src_p);
-
-static str_to_argv_err_t
-copy_cooked_string(char ** dest_p, char ** src_p);
-
-static inline void *
-Xmalloc(size_t sz)
-{
-    void * res = malloc(sz);
-    if (res == NULL) {
-        fprintf(stderr, nomem, sz);
-        exit(EXIT_FAILURE);
-    }
-    return res;
-}
-
-static inline void *
-Xrealloc(void * ptr, size_t sz)
-{
-    void * res = realloc(ptr, sz);
-    if (res == NULL) {
-        fprintf(stderr, nomem, sz);
-        exit(EXIT_FAILURE);
-    }
-    return res;
-}
-
-str_to_argv_err_t
-string_to_argv(char const * str, int * argc_p, char *** argv_p)
-{
-    int     argc = 0;
-    int     act  = 10;
-    char ** res  = (char**)Xmalloc(sizeof(char *) * 10);
-    char ** argv = res;
-    char *  scan;
-    char *  dest;
-    str_to_argv_err_t err;
-
-    while (isspace((unsigned char)*str))  str++;
-    str = scan = strdup(str);
-
-    for (;;) {
-        while (isspace((unsigned char)*scan))  scan++;
-        if (*scan == NUL)
-            break;
-
-        if (++argc >= act) {
-            act += act / 2;
-            res  = (char**)Xrealloc(res, act * sizeof(char *));
-            argv = res + (argc - 1);
-        }
-
-        *(argv++) = dest = scan;
-
-        for (;;) {
-            char ch = *(scan++);
-            switch (ch) {
-            case NUL:
-                goto done;
-
-            case '\\':
-                if ( (*(dest++) = *(scan++)) == NUL)
-                    goto done;
-                break;
-
-            case '\'':
-                err = copy_raw_string(&dest, &scan);
-                if (err != STR2AV_OK)
-                    goto error_leave;
-                break;
-
-            case '"':
-                err = copy_cooked_string(&dest, &scan);
-                if (err != STR2AV_OK)
-                    goto error_leave;
-                break;
-
-            case ' ':
-            case '\t':
-            case '\n':
-            case '\f':
-            case '\r':
-            case '\v':
-            case '\b':
-                goto token_done;
-
-            default:
-                *(dest++) = ch;
-            }
-        }
-
-    token_done:
-        *dest = NUL;
-    }
-
-done:
-
-    *argv_p = res;
-    *argc_p = argc;
-    *argv   = NULL;
-    if (argc == 0)
-        free((void *)str);
-
-    return STR2AV_OK;
-
-error_leave:
-
-    free(res);
-    free((void *)str);
-    return err;
-}
-
-static str_to_argv_err_t
-copy_raw_string(char ** dest_p, char ** src_p)
-{
-    for (;;) {
-        char ch = *((*src_p)++);
-
-        switch (ch) {
-        case NUL: return STR2AV_UNBALANCED_QUOTE;
-        case '\'':
-            *(*dest_p) = NUL;
-            return STR2AV_OK;
-
-        case '\\':
-            ch = *((*src_p)++);
-            switch (ch) {
-            case NUL:
-                return STR2AV_UNBALANCED_QUOTE;
-
-            default:
-                /*
-                 * unknown/invalid escape.  Copy escape character.
-                 */
-                *((*dest_p)++) = '\\';
-                break;
-
-            case '\\':
-            case '\'':
-                break;
-            }
-            /* FALLTHROUGH */
-
-        default:
-            *((*dest_p)++) = ch;
-            break;
-        }
-    }
-}
-
-static char
-escape_convt(char ** src_p)
-{
-    char ch = *((*src_p)++);
-
-    /*
-     *  Escape character is always eaten.  The next character is sometimes
-     *  treated specially.
-     */
-    switch (ch) {
-    case 'a': ch = '\a'; break;
-    case 'b': ch = '\b'; break;
-    case 't': ch = '\t'; break;
-    case 'n': ch = '\n'; break;
-    case 'v': ch = '\v'; break;
-    case 'f': ch = '\f'; break;
-    case 'r': ch = '\r'; break;
-    }
-
-    return ch;
-}
-
-
-static str_to_argv_err_t
-copy_cooked_string(char ** dest_p, char ** src_p)
-{
-    for (;;) {
-        char ch = *((*src_p)++);
-        switch (ch) {
-        case NUL: return STR2AV_UNBALANCED_QUOTE;
-        case '"':
-            *(*dest_p) = NUL;
-            return STR2AV_OK;
-
-        case '\\':
-            ch = escape_convt(src_p);
-            if (ch == NUL)
-                return STR2AV_UNBALANCED_QUOTE;
-            /* FALLTHROUGH */
-
-        default:
-            *((*dest_p)++) = ch;
-            break;
-        }
-    }
 }
