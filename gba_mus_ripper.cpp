@@ -18,6 +18,8 @@
 #include "sappy_detector.h"
 #include "song_ripper.h"
 #include <QDir>
+#include <QProcess>
+#include <QMessageBox>
 
 #ifndef WIN32
 namespace sappy_detector
@@ -87,7 +89,7 @@ static std::string dec3(unsigned int n)
 
 static int parse_args(const int argc, const char * args[])
 {
-	if(argc < 1) print_instructions();
+    if(argc < 1) print_instructions();
 
     bool path_found = false, song_tbl_found = false;
 
@@ -308,72 +310,39 @@ int musRip(int argc, std::string args[])
 	{
 		if(song_list[i] != song_tbl_end_ptr)
         {
-//            unsigned int bank_index = distance(sound_bank_list.begin(), sound_bank_index_list[i]);
-//            std::string seq_rip_cmd = prg_prefix + "song_ripper.exe \"" + inGBA_path + "\" \"" + name;
-
-//            // Add leading zeroes to file name
-//            if(sb) seq_rip_cmd += "/soundbank_" + dec3(bank_index);
-//            seq_rip_cmd += "/song" + dec3(i) + ".mid\"";
-
-//            seq_rip_cmd += " 0x" + hex(song_list[i]);
-//            seq_rip_cmd += rc ? " -rc" : (xg ? " -xg" : " -gs");
-//            if(!raw)
-//            {
-//                seq_rip_cmd += " -sv";
-//                seq_rip_cmd += " -lv";
-//            }
-//            // Bank number, if banks are not separated
-//            if(!sb)
-//                seq_rip_cmd += " -b" + std::to_string(bank_index);
-
-//            printf("Song %u\n", i);
-
-//            printf("DEBUG : Going to call system(%s)\n", seq_rip_cmd.c_str());
-//            if(!system(seq_rip_cmd.c_str())) puts("An error has occured.");
-
             unsigned int bank_index = distance(sound_bank_list.begin(), sound_bank_index_list[i]);
-            std::string seq_rip_args[8];
-
-            int k = 4;
-            seq_rip_args[0] = prg_prefix + "song_ripper";
-            seq_rip_args[1] = inGBA_path;
-            seq_rip_args[2] += name;
+            std::string seq_rip_cmd = "\"" + inGBA_path + "\" \"" + name;
 
             // Add leading zeroes to file name
-            if(sb)
-                seq_rip_args[2] += "\\soundbank_" + dec3(bank_index);
+            if(sb) seq_rip_cmd += "/soundbank_" + dec3(bank_index);
+            seq_rip_cmd += "/song" + dec3(i) + ".mid\"";
 
-            seq_rip_args[2] += "\\song" + dec3(i) + ".mid";
-
-            seq_rip_args[3] += "0x" + hex(song_list[i]);
-            seq_rip_args[4] += rc ? "-rc" : (xg ? "-xg" : "-gs");
+            seq_rip_cmd += " 0x" + hex(song_list[i]);
+            seq_rip_cmd += rc ? " -rc" : (xg ? " -xg" : " -gs");
             if(!raw)
             {
-                seq_rip_args[5] += "-sv";
-                seq_rip_args[6] += "-lv";
-                k += 2;
+                seq_rip_cmd += " -sv";
+                seq_rip_cmd += " -lv";
             }
             // Bank number, if banks are not separated
             if(!sb)
-            {
-                seq_rip_args[7] += "-b" + std::to_string(bank_index);
-                k++;
-            }
+                seq_rip_cmd += " -b" + std::to_string(bank_index);
 
             printf("Song %u\n", i);
 
-            std::string seq_rip_cmd = seq_rip_args[0];
+            //printf("DEBUG : Going to call system(%s)\n", seq_rip_cmd.c_str());
 
-            for (int w = 1; w < k; w++)
-            {
-                seq_rip_cmd += " ";
-                seq_rip_cmd += seq_rip_args[w];
-            }
+            QProcess song_ripper;
 
-            printf("DEBUG : Going to call system(%s)\n", seq_rip_cmd.c_str());
+            song_ripper.setProgram(QString::fromStdString(prg_prefix) + QString("song_ripper.exe"));
+            song_ripper.setNativeArguments(QString::fromStdString(seq_rip_cmd));
+            song_ripper.start();
+            song_ripper.waitForFinished();
 
-            if(ripSong(k, seq_rip_args) <= 0)
-                printf("An error has occured.");
+            puts(QString(song_ripper.readAllStandardOutput()).toStdString().c_str());
+
+            if(song_ripper.exitCode() <= 0)
+                puts("An error has occured.\n");
 		}
 	}
 	delete[] sound_bank_index_list;
@@ -388,16 +357,24 @@ int musRip(int argc, std::string args[])
 			std::string sbnumber = dec3(bank_index);
 			std::string foldername = "soundbank_" + sbnumber;
             std::string sf_rip_args;
-            sf_rip_args = prg_prefix + "sound_font_ripper \"" + inGBA_path + "\" \"" + name + '/';
+            sf_rip_args = "\"" + inGBA_path + "\" \"" + name + '/';
 			sf_rip_args += foldername + '/' + foldername /* + "_@" + hex(*j) */ + ".sf2\"";
 
 			if(sample_rate) sf_rip_args += " -s" + std::to_string(sample_rate);
 			if(main_volume)	sf_rip_args += " -mv" + std::to_string(main_volume);
 			if(gm) sf_rip_args += " -gm";
-			sf_rip_args += " 0x" + hex(*j);
+            sf_rip_args += " 0x" + hex(*j);
 
 // 			printf("DEBUG : Goint to call system(%s)\n", sf_rip_args.c_str());
-			system(sf_rip_args.c_str());
+            //system(sf_rip_args.c_str());
+
+            QProcess sf_ripper;
+            sf_ripper.setProgram(QString::fromStdString(prg_prefix) + QString("sound_font_ripper.exe"));
+            sf_ripper.setNativeArguments(QString::fromStdString(sf_rip_args));
+            sf_ripper.start();
+            sf_ripper.waitForFinished();
+
+            puts(QString(sf_ripper.readAllStandardOutput()).toStdString().c_str());
 		}
 	}
 	else
@@ -405,7 +382,7 @@ int musRip(int argc, std::string args[])
 		// Rips each sound bank in a single soundfont file
         // Build argument list to call sound_font_ripper
 		// Output sound font named after the input ROM
-        std::string sf_rip_args = prg_prefix + "sound_font_ripper \"" + inGBA_path + "\" \"" + name + '/' + name + ".sf2\"";
+        std::string sf_rip_args = "\"" + inGBA_path + "\" \"" + name + '/' + name + ".sf2\"";
 		if(sample_rate) sf_rip_args += " -s" + std::to_string(sample_rate);
 		if(main_volume) sf_rip_args += " -mv" + std::to_string(main_volume);
 		// Pass -gm argument if necessary
@@ -417,8 +394,20 @@ int musRip(int argc, std::string args[])
 
         // Call sound font ripper
 // 		printf("DEBUG : Going to call system(%s)\n", sf_rip_args.c_str());
-		system(sf_rip_args.c_str());
+        //system(sf_rip_args.c_str());
+
+        QProcess sf_ripper;
+        sf_ripper.setProgram(QString::fromStdString(prg_prefix) + QString("sound_font_ripper.exe"));
+        sf_ripper.setNativeArguments(QString::fromStdString(sf_rip_args));
+        sf_ripper.start();
+        sf_ripper.waitForFinished();
+
+        puts(QString(sf_ripper.readAllStandardOutput()).toStdString().c_str());
 	}
-	puts("Rip completed !");
+
+    puts("Rip completed!");
+    QMessageBox msg;
+    msg.setInformativeText("Rip completed!");
+    msg.exec();
 	return 0;
 }

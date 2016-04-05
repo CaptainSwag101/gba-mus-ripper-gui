@@ -28,6 +28,9 @@ void MainWindow::on_chooseRomButton_clicked()
         ui->romPathEdit->setText(QDir::toNativeSeparators(QFileDialog::getOpenFileName(this, tr("Choose output directory"), ui->romPathEdit->text(), "*.gba")));
     else
         ui->romPathEdit->setText(QDir::toNativeSeparators(QFileDialog::getOpenFileName(this, tr("Choose output directory"), QDir::currentPath(), "*.gba")));
+
+    //if (ui->outputPathEdit->text().isEmpty())
+        //ui->outputPathEdit->setText(ui->romPathEdit->text());
 }
 
 void MainWindow::on_chooseOutputButton_clicked()
