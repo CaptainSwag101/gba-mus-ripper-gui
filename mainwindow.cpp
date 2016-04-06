@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 #include "gba_mus_ripper.h"
 #include <QDir>
+#include <QFileInfo>
 #include <QFileDialog>
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -18,8 +19,8 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_startButton_clicked()
 {
-    std::string argv[] {(QDir::toNativeSeparators(QDir::currentPath() + "\\" + "gba_mus_ripper.exe")).toStdString(), (ui->romPathEdit->text()).toStdString()};
-    musRip(2, argv);
+    std::string argv[] {(QDir::toNativeSeparators(QDir::currentPath() + "\\" + "gba_mus_ripper.exe")).toStdString(), (ui->romPathEdit->text()).toStdString(), "-o", ui->outputPathEdit->text().toStdString() + '\\'};
+    musRip(3, argv);
 }
 
 void MainWindow::on_chooseRomButton_clicked()
@@ -29,8 +30,8 @@ void MainWindow::on_chooseRomButton_clicked()
     else
         ui->romPathEdit->setText(QDir::toNativeSeparators(QFileDialog::getOpenFileName(this, tr("Choose output directory"), QDir::currentPath(), "*.gba")));
 
-    //if (ui->outputPathEdit->text().isEmpty())
-        //ui->outputPathEdit->setText(ui->romPathEdit->text());
+    if (ui->outputPathEdit->text().isEmpty())
+        ui->outputPathEdit->setText(QDir::toNativeSeparators(QFileInfo(ui->romPathEdit->text()).absolutePath()));
 }
 
 void MainWindow::on_chooseOutputButton_clicked()

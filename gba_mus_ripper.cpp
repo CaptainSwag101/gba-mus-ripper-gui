@@ -11,25 +11,18 @@
 
 #include <stdlib.h>
 #include <stdint.h>
-#include <string.h>
+#include <string>
 #include <vector>
 #include <set>
-#include "hex_string.hpp"
+#include "hex_string.h"
 #include "sappy_detector.h"
-#include "song_ripper.h"
 #include <QDir>
 #include <QProcess>
 #include <QMessageBox>
 
-#ifndef WIN32
-namespace sappy_detector
-{
-    #include "sappy_detector.c"		// The main::function is called directly on linux
-}
-#endif
-
 static FILE *inGBA;
 static std::string inGBA_path;
+static std::string out_path;
 static size_t inGBA_size;
 static std::string name;
 static std::string path;
@@ -74,7 +67,14 @@ static uint32_t get_GBA_pointer()
 
 static void mkdir(std::string name)
 {
-	system(("mkdir \"" + name + '"').c_str());
+    if (out_path.size() > 0)
+    {
+        system(("mkdir " + '"' + out_path + name + '"').c_str());
+    }
+    else
+    {
+        system(("mkdir \"" + name + '"').c_str());
+    }
 }
 
 //  Convert number to string with always 3 digits (even if leading zeros)
@@ -89,7 +89,7 @@ static std::string dec3(unsigned int n)
 
 static int parse_args(const int argc, const char * args[])
 {
-    if(argc < 1) print_instructions();
+    if(argc < 2) print_instructions();
 
     bool path_found = false, song_tbl_found = false;
 
@@ -110,6 +110,13 @@ static int parse_args(const int argc, const char * args[])
 				sb = true;
 			else if(!strcmp(args[i], "-raw"))
 				raw = true;
+            else if(!strcmp(args[i], "-o") || !strcmp(args[i], "-O"))
+            {
+                if (argc > i)
+                {
+                    out_path = args[i + 1];
+                }
+            }
 			else
 			{
                 fprintf(stderr, "Error : Unknown command line option : %s. Try with --help or -h to get information.\n", args[i]);
@@ -128,9 +135,9 @@ static int parse_args(const int argc, const char * args[])
 			}
 
 			// Name is filename without the extention and without path
-			inGBA_path = std::string(args[i]);
-			size_t separator_index = inGBA_path.find_last_of("/\\") + 1;
-			name = inGBA_path.substr(separator_index, inGBA_path.find_last_of('.') - separator_index);
+            inGBA_path = std::string(args[i]);
+            size_t separator_index = inGBA_path.find_last_of("/\\") + 1;
+            name = inGBA_path.substr(separator_index, inGBA_path.find_last_of('.') - separator_index);
 
 			// Path where the input GBA file is located
 			path = inGBA_path.substr(0, separator_index);
@@ -179,19 +186,12 @@ int musRip(int argc, std::string args[])
 	// If the user hasn't provided an address manually, we'll try to automatically detect it
 	if(!song_tbl_ptr)
 	{
-		// Auto-detect address of sappy engine
-#ifdef WIN32
-		// On windows, just use the 32-bit return code of the sappy_detector executable
+        // Auto-detect address of sappy engine
         std::string sappy_detector_cmd;
         sappy_detector_cmd = inGBA_path;
         //printf(sappy_detector_cmd.c_str());
         //printf("\n");
         int sound_engine_adr = sappy_detect(sappy_detector_cmd);
-#else
-		// On linux the function is duplicated in this executable
-		const char *sappy_detector_argv1 = inGBA_path.c_str();
-		int sound_engine_adr = sappy_detector::main(2, &sappy_detector_argv1 - 1);
-#endif
 
         // Return if no sappy engine was found
         if(!sound_engine_adr) return(0);
@@ -311,7 +311,7 @@ int musRip(int argc, std::string args[])
 		if(song_list[i] != song_tbl_end_ptr)
         {
             unsigned int bank_index = distance(sound_bank_list.begin(), sound_bank_index_list[i]);
-            std::string seq_rip_cmd = "\"" + inGBA_path + "\" \"" + name;
+            std::string seq_rip_cmd = "\"" + out_path + name + "\"";
 
             // Add leading zeroes to file name
             if(sb) seq_rip_cmd += "/soundbank_" + dec3(bank_index);

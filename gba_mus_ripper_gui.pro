@@ -10,33 +10,18 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = gba_mus_ripper_gui
 TEMPLATE = app
-CONFIG += static console
 QMAKE_LFLAGS += -static
 
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    gba_instr.cpp \
     gba_mus_ripper.cpp \
-    gba_samples.cpp \
-    midi.cpp \
-    sf2.cpp \
-    song_ripper.cpp \
-    sound_font_ripper.cpp \
     sappy_detector.cpp
 
 HEADERS  += mainwindow.h \
-    gba_instr.hpp \
-    gba_samples.hpp \
-    hex_string.hpp \
-    midi.hpp \
-    sf2.hpp \
-    sf2_chunks.hpp \
-    sf2_types.hpp \
     gba_mus_ripper.h \
-    sound_font_ripper.h \
-    song_ripper.h \
-    sappy_detector.h
+    sappy_detector.h \
+    hex_string.h
 
 FORMS    += mainwindow.ui
 
@@ -44,4 +29,28 @@ DISTFILES += \
     goldensun_synth.raw \
     psg_data.raw
 
-unix|win32: LIBS += -lQt5Cored -lQt5Widgetsd
+win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../../../Qt/5.6/mingw49_32/lib/ -lQt5Core
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../../../../Qt/5.6/mingw49_32/lib/ -lQt5Cored
+else:unix: LIBS += -L$$PWD/../../../../Qt/5.6/mingw49_32/lib/ -lQt5Core
+
+INCLUDEPATH += $$PWD/../../../../Qt/5.6/mingw49_32/include
+DEPENDPATH += $$PWD/../../../../Qt/5.6/mingw49_32/include
+
+win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$PWD/../../../../Qt/5.6/mingw49_32/lib/libQt5Core.a
+else:win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/../../../../Qt/5.6/mingw49_32/lib/libQt5Cored.a
+else:win32:!win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$PWD/../../../../Qt/5.6/mingw49_32/lib/Qt5Core.lib
+else:win32:!win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/../../../../Qt/5.6/mingw49_32/lib/Qt5Cored.lib
+else:unix: PRE_TARGETDEPS += $$PWD/../../../../Qt/5.6/mingw49_32/lib/libQt5Core.a
+
+win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../../../Qt/5.6/mingw49_32/lib/ -lQt5Widgets
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../../../../Qt/5.6/mingw49_32/lib/ -lQt5Widgetsd
+else:unix: LIBS += -L$$PWD/../../../../Qt/5.6/mingw49_32/lib/ -lQt5Widgets
+
+INCLUDEPATH += $$PWD/../../../../Qt/5.6/mingw49_32/include
+DEPENDPATH += $$PWD/../../../../Qt/5.6/mingw49_32/include
+
+win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$PWD/../../../../Qt/5.6/mingw49_32/lib/libQt5Widgets.a
+else:win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/../../../../Qt/5.6/mingw49_32/lib/libQt5Widgetsd.a
+else:win32:!win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$PWD/../../../../Qt/5.6/mingw49_32/lib/Qt5Widgets.lib
+else:win32:!win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/../../../../Qt/5.6/mingw49_32/lib/Qt5Widgetsd.lib
+else:unix: PRE_TARGETDEPS += $$PWD/../../../../Qt/5.6/mingw49_32/lib/libQt5Widgets.a

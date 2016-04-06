@@ -11,10 +11,11 @@
 
 #include <algorithm>
 #include <forward_list>
-#include <cstdio>
-#include <cmath>
-#include <cstdlib>
-#include <cstring>
+#include <stdio.h>
+#include <math.h>
+#include <stdlib.h>
+#include <string>
+#include <memory.h>
 
 char const* sr_lookup[16] =
 {
@@ -194,7 +195,7 @@ static long m4a_searchblock(uint8_t *gbarom, size_t gbasize)
 	{
 		for (int mainpattern = 0; mainpattern < M4A_MAIN_PATT_COUNT; mainpattern++)
 		{
-            if (std::memcmp(&gbarom[m4a_main_offset_tmp], &m4a_bin_main[mainpattern][0], M4A_INIT_LEN) == 0)
+            if (memcmp(&gbarom[m4a_main_offset_tmp], &m4a_bin_main[mainpattern][0], M4A_INIT_LEN) == 0)
 			{
 				m4a_main_offset = (long) m4a_main_offset_tmp;
 				break;
