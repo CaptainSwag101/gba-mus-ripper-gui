@@ -6,8 +6,8 @@
  * This file provides a simple quick hex -> std::string conversion function
  */
 
-#ifndef HEX_STRING_HPP
-#define HEX_STRING_HPP
+#ifndef HEX_STRING_H
+#define HEX_STRING_H
 #include <string>
 #include <stdint.h>
 

@@ -16,18 +16,34 @@ QMAKE_LFLAGS += -static
 SOURCES += main.cpp\
         mainwindow.cpp \
     gba_mus_ripper.cpp \
-    sappy_detector.cpp
+    sappy_detector/sappy_detector.cpp \
+    song_ripper/midi.cpp \
+    song_ripper/song_ripper.cpp \
+    sound_font_ripper/gba_instr.cpp \
+    sound_font_ripper/gba_samples.cpp \
+    sound_font_ripper/sf2.cpp \
+    sound_font_ripper/sound_font_ripper.cpp \
+    song_ripper/note.cpp
 
 HEADERS  += mainwindow.h \
     gba_mus_ripper.h \
     sappy_detector.h \
-    hex_string.h
+    hex_string.h \
+    sappy_detector/sappy_detector.h \
+    song_ripper/midi.h \
+    sound_font_ripper/gba_instr.h \
+    sound_font_ripper/gba_samples.h \
+    sound_font_ripper/sf2.h \
+    sound_font_ripper/sf2_chunks.h \
+    sound_font_ripper/sf2_types.h \
+    song_ripper/song_ripper.h \
+    song_ripper/note.h
 
 FORMS    += mainwindow.ui
 
 DISTFILES += \
     goldensun_synth.raw \
-    psg_data.raw
+    sound_font_ripper/goldensun_synth.raw
 
 win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../../../Qt/5.6/mingw49_32/lib/ -lQt5Core
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../../../../Qt/5.6/mingw49_32/lib/ -lQt5Cored

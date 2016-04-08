@@ -14,26 +14,15 @@
 #include <string>
 #include <vector>
 #include <set>
+#include "gba_mus_ripper.h"
 #include "hex_string.h"
-#include "sappy_detector.h"
+#include "sappy_detector/sappy_detector.h"
+#include "song_ripper/song_ripper.h"
 #include <QDir>
 #include <QProcess>
 #include <QMessageBox>
 
 static FILE *inGBA;
-static std::string inGBA_path;
-static std::string out_path;
-static size_t inGBA_size;
-static std::string name;
-static std::string path;
-static bool gm = false;
-static bool xg = false;
-static bool rc = false;
-static bool sb = false;
-static bool raw = false;
-static uint32_t song_tbl_ptr = 0;
-
-static const int sample_rates[] = {-1, 5734, 7884, 10512, 13379, 15768, 18157, 21024, 26758, 31536, 36314, 40137, 42048};
 
 static int print_instructions()
 {
@@ -58,14 +47,14 @@ static int print_instructions()
     return(0);
 }
 
-static uint32_t get_GBA_pointer()
+uint32_t get_GBA_pointer()
 {
 	uint32_t p;
 	fread(&p, 4, 1, inGBA);
 	return p - 0x8000000;
 }
 
-static void mkdir(std::string name)
+void mkdir(string name)
 {
     if (out_path.size() > 0)
     {
@@ -78,16 +67,16 @@ static void mkdir(std::string name)
 }
 
 //  Convert number to string with always 3 digits (even if leading zeros)
-static std::string dec3(unsigned int n)
+string dec3(unsigned int n)
 {
-	std::string s;
+    string s;
 	s += "0123456789"[n/100];
 	s += "0123456789"[n/10%10];
 	s += "0123456789"[n%10];
 	return s;
 }
 
-static int parse_args(const int argc, const char * args[])
+int parse_args(const int argc, const char * args[])
 {
     if(argc < 2) print_instructions();
 
@@ -168,7 +157,7 @@ static int parse_args(const int argc, const char * args[])
     return(0);
 }
 
-int musRip(int argc, std::string args[])
+int musRip(int argc, string args[])
 {
     const char * argv[argc];
     for(int i = 0; i < argc; i++)
@@ -179,7 +168,7 @@ int musRip(int argc, std::string args[])
 	// Parse arguments (without program name)
     parse_args(argc-1, argv+1);
 
-    std::string prg_prefix = QDir::toNativeSeparators(QDir::currentPath() + "\\").toStdString();
+    string prg_prefix = QDir::toNativeSeparators(QDir::currentPath() + "\\").toStdString();
 
 	int sample_rate = 0, main_volume = 0;		// Use default values when those are '0'
 
@@ -187,7 +176,7 @@ int musRip(int argc, std::string args[])
 	if(!song_tbl_ptr)
 	{
         // Auto-detect address of sappy engine
-        std::string sappy_detector_cmd;
+        string sappy_detector_cmd;
         sappy_detector_cmd = inGBA_path;
         //printf(sappy_detector_cmd.c_str());
         //printf("\n");
@@ -232,9 +221,9 @@ int musRip(int argc, std::string args[])
 
 	printf("Parsing song table...");
 	// New list of songs
-	std::vector<uint32_t> song_list;
+    vector<uint32_t> song_list;
 	// New list of sound banks
-	std::set<uint32_t> sound_bank_list;
+    set<uint32_t> sound_bank_list;
 
 	if(fseek(inGBA, song_tbl_ptr, SEEK_SET))
 	{
@@ -275,7 +264,7 @@ int musRip(int argc, std::string args[])
 
 	puts("Collecting sound bank list...");
 
-	typedef std::set<uint32_t>::iterator bank_t;
+    typedef set<uint32_t>::iterator bank_t;
 	bank_t *sound_bank_index_list = new bank_t[song_list.size()];
 
 	for(i = 0; i < song_list.size(); i++)
@@ -301,7 +290,7 @@ int musRip(int argc, std::string args[])
 		for(bank_t j = sound_bank_list.begin(); j != sound_bank_list.end(); ++j)
 		{
 			unsigned int d = std::distance(sound_bank_list.begin(), j);
-			std::string subdir = name + '/' + "soundbank_" + dec3(d);
+            string subdir = name + '/' + "soundbank_" + dec3(d);
 			mkdir(subdir);
 		}
 	}
@@ -311,7 +300,7 @@ int musRip(int argc, std::string args[])
 		if(song_list[i] != song_tbl_end_ptr)
         {
             unsigned int bank_index = distance(sound_bank_list.begin(), sound_bank_index_list[i]);
-            std::string seq_rip_cmd = "\"" + out_path + name + "\"";
+            string seq_rip_cmd = "\"" + out_path + name + "\"";
 
             // Add leading zeroes to file name
             if(sb) seq_rip_cmd += "/soundbank_" + dec3(bank_index);
@@ -354,14 +343,14 @@ int musRip(int argc, std::string args[])
 		{
 			unsigned int bank_index = distance(sound_bank_list.begin(), j);
 
-			std::string sbnumber = dec3(bank_index);
-			std::string foldername = "soundbank_" + sbnumber;
-            std::string sf_rip_args;
+            string sbnumber = dec3(bank_index);
+            string foldername = "soundbank_" + sbnumber;
+            string sf_rip_args;
             sf_rip_args = "\"" + inGBA_path + "\" \"" + name + '/';
 			sf_rip_args += foldername + '/' + foldername /* + "_@" + hex(*j) */ + ".sf2\"";
 
-			if(sample_rate) sf_rip_args += " -s" + std::to_string(sample_rate);
-			if(main_volume)	sf_rip_args += " -mv" + std::to_string(main_volume);
+            if(sample_rate) sf_rip_args += " -s" + to_string(sample_rate);
+            if(main_volume)	sf_rip_args += " -mv" + to_string(main_volume);
 			if(gm) sf_rip_args += " -gm";
             sf_rip_args += " 0x" + hex(*j);
 
@@ -382,9 +371,9 @@ int musRip(int argc, std::string args[])
 		// Rips each sound bank in a single soundfont file
         // Build argument list to call sound_font_ripper
 		// Output sound font named after the input ROM
-        std::string sf_rip_args = "\"" + inGBA_path + "\" \"" + name + '/' + name + ".sf2\"";
-		if(sample_rate) sf_rip_args += " -s" + std::to_string(sample_rate);
-		if(main_volume) sf_rip_args += " -mv" + std::to_string(main_volume);
+        string sf_rip_args = "\"" + inGBA_path + "\" \"" + name + '/' + name + ".sf2\"";
+        if(sample_rate) sf_rip_args += " -s" + to_string(sample_rate);
+        if(main_volume) sf_rip_args += " -mv" + to_string(main_volume);
 		// Pass -gm argument if necessary
 		if(gm) sf_rip_args += " -gm";
 
