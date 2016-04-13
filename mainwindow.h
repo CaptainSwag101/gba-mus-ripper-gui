@@ -1,3 +1,8 @@
+#include "ripper_core.h"
+#include <QDir>
+#include <QFileInfo>
+#include <QFileDialog>
+
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
@@ -16,6 +21,8 @@ public:
     ~MainWindow();
 
 private slots:
+
+    bool arePathsValid();
 
     void on_startButton_clicked();
 

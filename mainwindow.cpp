@@ -1,9 +1,5 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include "gba_mus_ripper.h"
-#include <QDir>
-#include <QFileInfo>
-#include <QFileDialog>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -17,10 +13,20 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+bool MainWindow::arePathsValid()
+{
+    return (!ui->outputPathEdit->text().isEmpty() && !ui->romPathEdit->text().isEmpty() && QDir(QDir::toNativeSeparators(ui->outputPathEdit->text())).exists() && QDir(QDir::toNativeSeparators(ui->romPathEdit->text())).exists());
+}
+
 void MainWindow::on_startButton_clicked()
 {
-    std::string argv[] {(QDir::toNativeSeparators(QDir::currentPath() + "\\" + "gba_mus_ripper.exe")).toStdString(), (ui->romPathEdit->text()).toStdString(), "-o", ui->outputPathEdit->text().toStdString() + '\\'};
-    musRip(3, argv);
+    if (arePathsValid())
+    {
+        if (startRip(ui->romPathEdit->text(), ui->outputPathEdit->text(), false, false, false, false, false, -1) != 0)
+        {
+
+        }
+    }
 }
 
 void MainWindow::on_chooseRomButton_clicked()
