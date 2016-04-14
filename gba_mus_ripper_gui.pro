@@ -25,7 +25,10 @@ FORMS    += mainwindow.ui \
 
 DISTFILES += \
     goldensun_synth.raw \
-    psg_data.raw
+    psg_data.raw \
+    GBA_Mus_Ripper.ico
+
+win32:RC_ICONS += GBA_Mus_Ripper.ico
 
 win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../../../Qt/5.6/mingw49_32/lib/ -lQt5Core
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../../../../Qt/5.6/mingw49_32/lib/ -lQt5Cored
