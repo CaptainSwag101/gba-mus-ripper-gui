@@ -26,9 +26,9 @@ ProgressDialog::ProgressDialog(QWidget *parent, QString rom, QString out) :
     //puts(QString(QDir::toNativeSeparators(QDir::currentPath() + '\\' + "gba_mus_ripper.exe ")).toStdString().c_str());
     //puts(nativeArgs.toStdString().c_str());
 
-    QProcess * ripper = new QProcess(this);
+    ripper = new QProcess(this);
     ripper->setProgram(QString(QDir::toNativeSeparators(QDir::currentPath() + '\\' + "gba_mus_ripper.exe")));
-    ripper->setArguments(nativeArgs.split(" "));
+    ripper->setNativeArguments(nativeArgs);
 
     connect(ripper, SIGNAL(finished(int, QProcess::ExitStatus)), this, SLOT(Finish()));
     ripper->start();
@@ -36,7 +36,7 @@ ProgressDialog::ProgressDialog(QWidget *parent, QString rom, QString out) :
 
 void ProgressDialog::Finish()
 {
-    QMessageBox * resultMsg = new QMessageBox(this);
+    QMessageBox *resultMsg = new QMessageBox(this);
 
     ui->progressBar->setMaximum(100);
     if (ripper->exitCode() == 0)

@@ -24,7 +24,7 @@ public slots:
 
 private:
     Ui::ProgressDialog *ui;
-    QProcess * ripper;
+    QProcess *ripper;
     QString romPath;
     QString outPath;
 };
