@@ -15,15 +15,13 @@ QMAKE_LFLAGS += -static
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    gba_mus_ripper.cpp \
-    sappy_detector.cpp
+    progressdialog.cpp
 
 HEADERS  += mainwindow.h \
-    gba_mus_ripper.h \
-    sappy_detector.h \
-    hex_string.h
+    progressdialog.h
 
-FORMS    += mainwindow.ui
+FORMS    += mainwindow.ui \
+    progressdialog.ui
 
 DISTFILES += \
     goldensun_synth.raw \

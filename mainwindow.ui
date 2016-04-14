@@ -10,8 +10,14 @@
     <height>331</height>
    </rect>
   </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>GBA Mus Ripper GUI</string>
   </property>
   <widget class="QWidget" name="centralWidget">
    <widget class="QLabel" name="inputLabel">
@@ -162,7 +168,7 @@
      <string>XG-compliant MIDIs</string>
     </property>
    </widget>
-   <widget class="QWidget" name="">
+   <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
       <x>10</x>
@@ -190,6 +196,7 @@
    </widget>
    <zorder>layoutWidget</zorder>
    <zorder>layoutWidget</zorder>
+   <zorder>layoutWidget</zorder>
    <zorder>inputLabel</zorder>
    <zorder>outputLabel</zorder>
    <zorder>startButton</zorder>
@@ -198,8 +205,6 @@
    <zorder>avoidCh10</zorder>
    <zorder>outputRaw</zorder>
    <zorder>makeXGCompliant</zorder>
-   <zorder>manualAddressEnable</zorder>
-   <zorder>manualAddress</zorder>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">

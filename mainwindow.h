@@ -25,6 +25,10 @@ private slots:
 
     void on_manualAddressEnable_stateChanged();
 
+    void on_actionExit_triggered();
+
+    void on_actionAbout_triggered();
+
 private:
     Ui::MainWindow *ui;
 };
