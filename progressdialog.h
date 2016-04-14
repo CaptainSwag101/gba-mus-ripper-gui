@@ -2,6 +2,7 @@
 #define PROGRESSDIALOG_H
 
 #include <QDialog>
+#include  <QMessageBox>
 #include <QProcess>
 #include <QObject>
 #include <QDir>
@@ -15,18 +16,17 @@ class ProgressDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit ProgressDialog(QWidget *parent, QString romPath = "", QString outPath = "");
+    explicit ProgressDialog(QWidget *parent, QString rom = "", QString out = "");
     ~ProgressDialog();
 
 public slots:
     void Finish();
 
-private slots:
-    void on_closeButton_clicked();
-
 private:
     Ui::ProgressDialog *ui;
     QProcess * ripper;
+    QString romPath;
+    QString outPath;
 };
 
 #endif // PROGRESSDIALOG_H

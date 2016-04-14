@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>311</width>
-    <height>114</height>
+    <height>67</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -22,30 +22,17 @@
   <property name="modal">
    <bool>true</bool>
   </property>
-  <widget class="QPushButton" name="closeButton">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="geometry">
-    <rect>
-     <x>220</x>
-     <y>80</y>
-     <width>75</width>
-     <height>23</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Done</string>
-   </property>
-  </widget>
   <widget class="QProgressBar" name="progressBar">
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>40</y>
+     <y>30</y>
      <width>271</width>
      <height>23</height>
     </rect>
+   </property>
+   <property name="maximum">
+    <number>0</number>
    </property>
    <property name="value">
     <number>0</number>
@@ -58,8 +45,8 @@
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>20</y>
-     <width>91</width>
+     <y>10</y>
+     <width>141</width>
      <height>16</height>
     </rect>
    </property>
