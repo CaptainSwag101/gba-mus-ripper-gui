@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "progressdialog.h"
+#include "aboutdialog.h"
 #include "ui_mainwindow.h"
 #include <QDir>
 #include <QFileInfo>
@@ -86,4 +87,6 @@ void MainWindow::on_actionExit_triggered()
 void MainWindow::on_actionAbout_triggered()
 {
     // open 'About' window
+    AboutDialog *about = new AboutDialog(this);
+    about->exec();
 }

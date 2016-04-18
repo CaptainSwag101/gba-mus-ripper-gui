@@ -14,13 +14,16 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    progressdialog.cpp
+    progressdialog.cpp \
+    aboutdialog.cpp
 
 HEADERS  += mainwindow.h \
-    progressdialog.h
+    progressdialog.h \
+    aboutdialog.h
 
 FORMS    += mainwindow.ui \
-    progressdialog.ui
+    progressdialog.ui \
+    aboutdialog.ui
 
 DISTFILES += \
     goldensun_synth.raw \
