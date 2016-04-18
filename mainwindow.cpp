@@ -23,8 +23,29 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_startButton_clicked()
 {
-    ProgressDialog * progDialog = new ProgressDialog(this, ui->romPathEdit->text(), ui->outputPathEdit->text());
-    progDialog->exec();
+    if (!QFileInfo(QDir::currentPath() + '\\' + "gba_mus_ripper.exe").exists())
+    {
+        QMessageBox *errorMsg = new QMessageBox(this);
+        errorMsg->setIcon(QMessageBox::Critical);
+        errorMsg->setText("Unable to find the \"gba_mus_ripper.exe\" executable in this program's directory.\n"
+                          "Unable to extract music.");
+        errorMsg->exec();
+    }
+    else
+    {
+        romPath = ui->romPathEdit->text();
+        outputPath = ui->outputPathEdit->text();
+        gmFlag = ui->giveGMNames->isChecked();
+        xgFlag = ui->makeXGCompliant->isChecked();
+        rcFlag = ui->avoidCh10->isChecked();
+        sbFlag = ui->splitSoundBanks->isChecked();
+        rawFlag = ui->outputRaw->isChecked();
+        adrFlag = ui->manualAddressEnable->isChecked();
+        address = ui->manualAddress->text();
+
+        ProgressDialog * progDialog = new ProgressDialog(this);
+        progDialog->exec();
+    }
 }
 
 void MainWindow::on_chooseRomButton_clicked()
@@ -32,6 +53,8 @@ void MainWindow::on_chooseRomButton_clicked()
     QFileDialog * openRom;
     if (!ui->romPathEdit->text().isEmpty() && QDir(QDir::toNativeSeparators(ui->romPathEdit->text())).exists())
         ui->romPathEdit->setText(QDir::toNativeSeparators(openRom->getOpenFileName(this, tr("Choose a GBA ROM"), ui->romPathEdit->text(), "GBA ROMs (*.gba)")));
+    else if (!ui->outputPathEdit->text().isEmpty() && QDir(QDir::toNativeSeparators(ui->outputPathEdit->text())).exists())
+        ui->romPathEdit->setText(QDir::toNativeSeparators(openRom->getOpenFileName(this, tr("Choose a GBA ROM"), ui->outputPathEdit->text(), "GBA ROMs (*.gba)")));
     else
         ui->romPathEdit->setText(QDir::toNativeSeparators(openRom->getOpenFileName(this, tr("Choose a GBA ROM"), QDir::currentPath(), "GBA ROMs (*.gba)")));
 

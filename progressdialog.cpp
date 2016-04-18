@@ -1,7 +1,7 @@
 #include "progressdialog.h"
 #include "ui_progressdialog.h"
 
-ProgressDialog::ProgressDialog(QWidget *parent, QString rom, QString out) :
+ProgressDialog::ProgressDialog(MainWindow *parent) :
     QDialog(parent),
     ui(new Ui::ProgressDialog)
 {
@@ -9,8 +9,10 @@ ProgressDialog::ProgressDialog(QWidget *parent, QString rom, QString out) :
     ui->progressBar->setMaximum(0);
     ui->progressBar->setMinimum(0);
 
-    romPath = rom;
-    outPath = out;
+    setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint & ~Qt::WindowCloseButtonHint);
+
+    romPath = parent->romPath;
+    outPath = parent->outputPath;
 
     //std::string argv[] {(QDir::toNativeSeparators(QDir::currentPath() + '\\' + "gba_mus_ripper.exe")).toStdString(), (ui->romPathEdit->text()).toStdString(), "-o ", ui->outputPathEdit->text().toStdString()};
     QString nativeArgs;
@@ -23,6 +25,19 @@ ProgressDialog::ProgressDialog(QWidget *parent, QString rom, QString out) :
     nativeArgs += '"';
     nativeArgs += outPath;
     nativeArgs += '"';
+
+    if (parent->gmFlag)
+        nativeArgs += " -gm";
+    if (parent->xgFlag)
+        nativeArgs += " -xg";
+    if (parent->rcFlag)
+        nativeArgs += " -rc";
+    if (parent->sbFlag)
+        nativeArgs += " -sb";
+    if (parent->rawFlag)
+        nativeArgs += " -raw";
+    if (parent->adrFlag && !parent->address.isEmpty())
+        nativeArgs += " -adr " + parent->address;
     //puts(QString(QDir::toNativeSeparators(QDir::currentPath() + '\\' + "gba_mus_ripper.exe ")).toStdString().c_str());
     //puts(nativeArgs.toStdString().c_str());
 
@@ -59,7 +74,7 @@ void ProgressDialog::Finish()
             break;
 
         case -2:
-            resultMsg->setText("Unable to open file " + romPath + " for reading!");
+            resultMsg->setText("Unable to open file \"" + romPath + "\" for reading!");
             break;
 
         case -3:

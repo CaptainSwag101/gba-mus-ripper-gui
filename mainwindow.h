@@ -15,6 +15,17 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
+    QString romPath;
+    QString outputPath;
+
+    bool gmFlag;
+    bool xgFlag;
+    bool rcFlag;
+    bool sbFlag;
+    bool rawFlag;
+    bool adrFlag;
+    QString address;
+
 private slots:
 
     void on_startButton_clicked();

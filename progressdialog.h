@@ -6,6 +6,7 @@
 #include <QProcess>
 #include <QObject>
 #include <QDir>
+#include "mainwindow.h"
 
 namespace Ui {
 class ProgressDialog;
@@ -16,7 +17,7 @@ class ProgressDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit ProgressDialog(QWidget *parent, QString rom = "", QString out = "");
+    explicit ProgressDialog(MainWindow *parent);
     ~ProgressDialog();
 
 public slots:
