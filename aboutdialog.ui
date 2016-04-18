@@ -7,17 +7,17 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>124</height>
+    <height>154</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>About</string>
   </property>
   <widget class="QWidget" name="horizontalLayoutWidget">
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>90</y>
+     <y>120</y>
      <width>381</width>
      <height>31</height>
     </rect>
@@ -44,14 +44,20 @@
      <x>10</x>
      <y>10</y>
      <width>381</width>
-     <height>41</height>
+     <height>71</height>
     </rect>
    </property>
    <layout class="QHBoxLayout" name="horizontalLayout_3">
     <item>
      <widget class="QLabel" name="label">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
       <property name="text">
-       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;GBA Mus Ripper GUI&lt;/p&gt;&lt;p&gt;A graphical frontend for my fork of Bregalad's tool, &amp;quot;gba_mus_riper&amp;quot;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;GBA Mus Ripper GUI&lt;/p&gt;&lt;p&gt;By James &amp;quot;CaptainSwag101&amp;quot; Pelster&lt;/p&gt;&lt;p&gt;A graphical frontend for my fork of Bregalad's tool, &amp;quot;gba_mus_riper&amp;quot;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
       </property>
      </widget>
     </item>
@@ -61,7 +67,7 @@
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>50</y>
+     <y>80</y>
      <width>381</width>
      <height>40</height>
     </rect>
