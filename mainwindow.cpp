@@ -32,6 +32,24 @@ void MainWindow::on_startButton_clicked()
                           "Unable to extract music.");
         errorMsg->exec();
     }
+    else if (ui->romPathEdit->text().isEmpty())
+    {
+        QMessageBox *errorMsg = new QMessageBox(this);
+        errorMsg->setIcon(QMessageBox::Critical);
+        if (ui->outputPathEdit->text().isEmpty())
+            errorMsg->setText("No GBA ROM or output path specified.");
+        else
+            errorMsg->setText("No GBA ROM specified.");
+
+        errorMsg->exec();
+    }
+    else if (ui->outputPathEdit->text().isEmpty())
+    {
+        QMessageBox *errorMsg = new QMessageBox(this);
+        errorMsg->setIcon(QMessageBox::Critical);
+        errorMsg->setText("No GBA ROM or output path specified.");
+        errorMsg->exec();
+    }
     else
     {
         romPath = ui->romPathEdit->text();
@@ -54,7 +72,7 @@ void MainWindow::on_chooseRomButton_clicked()
     QFileDialog * openRom;
     if (!ui->romPathEdit->text().isEmpty() && QDir(QDir::toNativeSeparators(ui->romPathEdit->text())).exists())
         ui->romPathEdit->setText(QDir::toNativeSeparators(openRom->getOpenFileName(this, tr("Choose a GBA ROM"), ui->romPathEdit->text(), "GBA ROMs (*.gba)")));
-    else if (!ui->outputPathEdit->text().isEmpty() && QDir(QDir::toNativeSeparators(ui->outputPathEdit->text())).exists())
+    else if (!ui->outputPathEdit->text().isEmpty() && QDir(QDir::toNativeSeparators(ui->outputPathEdit->text() + "\\")).exists())
         ui->romPathEdit->setText(QDir::toNativeSeparators(openRom->getOpenFileName(this, tr("Choose a GBA ROM"), ui->outputPathEdit->text(), "GBA ROMs (*.gba)")));
     else
         ui->romPathEdit->setText(QDir::toNativeSeparators(openRom->getOpenFileName(this, tr("Choose a GBA ROM"), QDir::currentPath(), "GBA ROMs (*.gba)")));

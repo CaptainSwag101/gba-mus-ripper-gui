@@ -1,11 +1,14 @@
 #ifndef PROGRESSDIALOG_H
 #define PROGRESSDIALOG_H
 
+#include <QDesktopServices>
 #include <QDialog>
-#include  <QMessageBox>
-#include <QProcess>
-#include <QObject>
 #include <QDir>
+#include <QMessageBox>
+#include <QObject>
+#include <QProcess>
+#include <QUrl>
+
 #include "mainwindow.h"
 
 namespace Ui {

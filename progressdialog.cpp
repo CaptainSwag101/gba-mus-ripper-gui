@@ -6,10 +6,10 @@ ProgressDialog::ProgressDialog(MainWindow *parent) :
     ui(new Ui::ProgressDialog)
 {
     ui->setupUi(this);
+    setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint & ~Qt::WindowCloseButtonHint);
+
     ui->progressBar->setMaximum(0);
     ui->progressBar->setMinimum(0);
-
-    setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint & ~Qt::WindowCloseButtonHint);
 
     romPath = parent->romPath;
     outPath = parent->outputPath;
@@ -58,8 +58,14 @@ void ProgressDialog::Finish()
     {
         ui->label->setText("Extraction completed!");
         ui->progressBar->setValue(100);
-        resultMsg->setIcon(QMessageBox::Information);
-        resultMsg->setText("Music was successfully extracted to " + outPath);
+        QString romName = romPath.split(QDir::separator()).last();
+        romName.truncate((romName.length() - 1) - romName.split('.').last().length());
+        QMessageBox::StandardButton reply;
+        reply = QMessageBox::question(this, "Extraction complete!", "Music was successfully extracted to \"" + outPath + "\\" + romName + "\".\nDo you want to open the output directory now?", QMessageBox::Yes | QMessageBox::No);
+        if (reply == QMessageBox::Yes)
+        {
+            QDesktopServices::openUrl(QUrl::fromLocalFile(outPath + "\\" + romName));
+        }
     }
     else
     {
@@ -97,9 +103,9 @@ void ProgressDialog::Finish()
             resultMsg->setText("Unable to parse song table.");
             break;
         }
+        resultMsg->exec();
     }
 
-    resultMsg->exec();
     close();
 }
 
