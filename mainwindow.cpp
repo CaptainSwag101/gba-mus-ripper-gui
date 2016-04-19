@@ -47,7 +47,7 @@ void MainWindow::on_startButton_clicked()
     {
         QMessageBox *errorMsg = new QMessageBox(this);
         errorMsg->setIcon(QMessageBox::Critical);
-        errorMsg->setText("No GBA ROM or output path specified.");
+        errorMsg->setText("No output path specified.");
         errorMsg->exec();
     }
     else
@@ -62,34 +62,48 @@ void MainWindow::on_startButton_clicked()
         adrFlag = ui->manualAddressEnable->isChecked();
         address = ui->manualAddress->text();
 
-        ProgressDialog * progDialog = new ProgressDialog(this);
+        ProgressDialog *progDialog = new ProgressDialog(this);
         progDialog->exec();
     }
 }
 
 void MainWindow::on_chooseRomButton_clicked()
 {
-    QFileDialog * openRom;
-    if (!ui->romPathEdit->text().isEmpty() && QDir(QDir::toNativeSeparators(ui->romPathEdit->text())).exists())
-        ui->romPathEdit->setText(QDir::toNativeSeparators(openRom->getOpenFileName(this, tr("Choose a GBA ROM"), ui->romPathEdit->text(), "GBA ROMs (*.gba)")));
-    else if (!ui->outputPathEdit->text().isEmpty() && QDir(QDir::toNativeSeparators(ui->outputPathEdit->text() + "\\")).exists())
-        ui->romPathEdit->setText(QDir::toNativeSeparators(openRom->getOpenFileName(this, tr("Choose a GBA ROM"), ui->outputPathEdit->text(), "GBA ROMs (*.gba)")));
-    else
-        ui->romPathEdit->setText(QDir::toNativeSeparators(openRom->getOpenFileName(this, tr("Choose a GBA ROM"), QDir::currentPath(), "GBA ROMs (*.gba)")));
+    QFileDialog openRom;
+    QString result;
 
-    if (ui->outputPathEdit->text().isEmpty())
-        ui->outputPathEdit->setText(QDir::toNativeSeparators(QFileInfo(ui->romPathEdit->text()).absolutePath()));
+    if (!ui->romPathEdit->text().isEmpty() && QDir(QDir::toNativeSeparators(ui->romPathEdit->text())).exists())
+        result = QDir::toNativeSeparators(openRom.getOpenFileName(this, tr("Choose a GBA ROM"), ui->romPathEdit->text(), "GBA ROMs (*.gba)"));
+    else if (!ui->outputPathEdit->text().isEmpty() && QDir(QDir::toNativeSeparators(ui->outputPathEdit->text() + "\\")).exists())
+        result = QDir::toNativeSeparators(openRom.getOpenFileName(this, tr("Choose a GBA ROM"), ui->outputPathEdit->text(), "GBA ROMs (*.gba)"));
+    else
+        result = QDir::toNativeSeparators(openRom.getOpenFileName(this, tr("Choose a GBA ROM"), QDir::currentPath(), "GBA ROMs (*.gba)"));
+
+    if (!result.isEmpty())
+    {
+        ui->romPathEdit->setText(result);
+
+        if (ui->outputPathEdit->text().isEmpty())
+            ui->outputPathEdit->setText(QDir::toNativeSeparators(QFileInfo(result).absolutePath()));
+    }
 }
 
 void MainWindow::on_chooseOutputButton_clicked()
 {
-    QFileDialog * openOutput;
+    QFileDialog openOutput;
+    QString result;
+
     if (!ui->outputPathEdit->text().isEmpty() && QDir(QDir::toNativeSeparators(ui->outputPathEdit->text())).exists())
-        ui->outputPathEdit->setText(QDir::toNativeSeparators(openOutput->getExistingDirectory(this, tr("Choose output directory"), ui->outputPathEdit->text(), QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks)));
+        result = QDir::toNativeSeparators(openOutput.getExistingDirectory(this, tr("Choose output directory"), ui->outputPathEdit->text(), QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks));
     else if (!ui->romPathEdit->text().isEmpty() && QDir(QDir::toNativeSeparators(ui->romPathEdit->text())).exists())
-        ui->outputPathEdit->setText(QDir::toNativeSeparators(openOutput->getExistingDirectory(this, tr("Choose output directory"), ui->romPathEdit->text(), QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks)));
+        result = QDir::toNativeSeparators(openOutput.getExistingDirectory(this, tr("Choose output directory"), ui->romPathEdit->text(), QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks));
     else
-        ui->outputPathEdit->setText(QDir::toNativeSeparators(openOutput->getExistingDirectory(this, tr("Choose output directory"), QDir::currentPath(), QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks)));
+        result = QDir::toNativeSeparators(openOutput.getExistingDirectory(this, tr("Choose output directory"), QDir::currentPath(), QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks));
+
+    if (!result.isEmpty())
+    {
+        ui->outputPathEdit->setText(result);
+    }
 }
 
 void MainWindow::on_manualAddressEnable_stateChanged()
@@ -104,7 +118,6 @@ void MainWindow::on_actionExit_triggered()
 
 void MainWindow::on_actionAbout_triggered()
 {
-    // open 'About' window
     AboutDialog *about = new AboutDialog(this);
     about->exec();
 }
