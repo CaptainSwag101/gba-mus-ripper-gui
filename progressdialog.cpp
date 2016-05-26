@@ -1,9 +1,7 @@
 #include "progressdialog.h"
 #include "ui_progressdialog.h"
 
-ProgressDialog::ProgressDialog(MainWindow *parent) :
-    QDialog(parent),
-    ui(new Ui::ProgressDialog)
+ProgressDialog::ProgressDialog(MainWindow *parent) : QDialog(parent), ui(new Ui::ProgressDialog)
 {
     ui->setupUi(this);
     setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint & ~Qt::WindowCloseButtonHint);
@@ -14,10 +12,7 @@ ProgressDialog::ProgressDialog(MainWindow *parent) :
     romPath = parent->romPath;
     outPath = parent->outputPath;
 
-    //std::string argv[] {(QDir::toNativeSeparators(QDir::currentPath() + '\\' + "gba_mus_ripper.exe")).toStdString(), (ui->romPathEdit->text()).toStdString(), "-o ", ui->outputPathEdit->text().toStdString()};
     QString nativeArgs;
-    //nativeArgs += QString(QDir::toNativeSeparators(QDir::currentPath() + '\\' + "gba_mus_ripper.exe"));
-    //nativeArgs += " \"";
     nativeArgs += '"';
     nativeArgs += romPath;
     nativeArgs += '"';
@@ -38,11 +33,9 @@ ProgressDialog::ProgressDialog(MainWindow *parent) :
         nativeArgs += " -raw";
     if (parent->adrFlag && !parent->address.isEmpty())
         nativeArgs += " -adr " + parent->address;
-    //puts(QString(QDir::toNativeSeparators(QDir::currentPath() + '\\' + "gba_mus_ripper.exe ")).toStdString().c_str());
-    //puts(nativeArgs.toStdString().c_str());
 
     ripper = new QProcess(this);
-    ripper->setProgram(QString(QDir::toNativeSeparators(QDir::currentPath() + '\\' + "gba_mus_ripper.exe")));
+    ripper->setProgram(QString(QDir::toNativeSeparators(QDir::currentPath() + '/' + "gba_mus_ripper.exe")));
     ripper->setNativeArguments(nativeArgs);
 
     connect(ripper, SIGNAL(finished(int, QProcess::ExitStatus)), this, SLOT(Finish()));
@@ -61,10 +54,10 @@ void ProgressDialog::Finish()
         QString romName = romPath.split(QDir::separator()).last();
         romName.truncate((romName.length() - 1) - romName.split('.').last().length());
         QMessageBox::StandardButton reply;
-        reply = QMessageBox::question(this, "Extraction complete!", "Music was successfully extracted to \"" + outPath + "\\" + romName + "\".\nDo you want to open the output directory now?", QMessageBox::Yes | QMessageBox::No);
+        reply = QMessageBox::question(this, "Extraction complete!", "Music was successfully extracted to \"" + outPath + QDir::separator() + romName + "\".\nDo you want to open the output directory now?", QMessageBox::Yes | QMessageBox::No);
         if (reply == QMessageBox::Yes)
         {
-            QDesktopServices::openUrl(QUrl::fromLocalFile(outPath + "\\" + romName));
+            QDesktopServices::openUrl(QUrl::fromLocalFile(outPath + QDir::separator() + romName));
         }
     }
     else
