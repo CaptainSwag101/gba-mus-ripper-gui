@@ -10,6 +10,7 @@
 #include <QUrl>
 
 #include "mainwindow.h"
+#include "gba_mus_ripper/gba_mus_ripper.h"
 
 namespace Ui {
 class ProgressDialog;
