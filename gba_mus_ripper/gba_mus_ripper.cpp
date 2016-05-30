@@ -87,7 +87,7 @@ static string dec3(unsigned int n)
 
 static void parse_args(int argc, string argv[])
 {
-    const char * args[argc];
+    const char *args[argc];
     for (int c = 0; c < argc; c++)
     {
         args[c] = argv[c].c_str();

@@ -68,10 +68,10 @@ void ProgressDialog::Finish(int exitCode)
         QString romName = romPath.split(QDir::separator()).last();
         romName.truncate((romName.length() - 1) - romName.split('.').last().length());
         QMessageBox::StandardButton reply;
-        reply = QMessageBox::question(this, "Extraction complete!", "Music was successfully extracted to \"" + outPath + QDir::separator() + romName + "\".\nDo you want to open the output directory now?", QMessageBox::Yes | QMessageBox::No);
+        reply = QMessageBox::question(this, "Extraction complete!", "Music was successfully extracted to \"" + romName + "\".\nDo you want to open the output directory now?", QMessageBox::Yes | QMessageBox::No);
         if (reply == QMessageBox::Yes)
         {
-            QDesktopServices::openUrl(QUrl::fromLocalFile(outPath + QDir::separator() + romName));
+            QDesktopServices::openUrl(QUrl::fromLocalFile(QDir::toNativeSeparators(romName)));
         }
     }
     else
