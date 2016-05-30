@@ -9,6 +9,6 @@
 #include <cstdlib>
 #include <cstring>
 
-int song_ripper(int argc, std::string argv[]);
+int song_ripper(int argc, char *argv[]);
 
 #endif // SONG_RIPPER_H

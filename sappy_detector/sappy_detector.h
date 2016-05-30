@@ -7,6 +7,8 @@
 #include <stdbool.h>
 #include <memory.h>
 
-int sappy_detector(const int argc, std::string argv);
+using namespace std;
+
+int sappy_detector(const int argc, string argv);
 
 #endif // SAPPY_DETECTOR_H

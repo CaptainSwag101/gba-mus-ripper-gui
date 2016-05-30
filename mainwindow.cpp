@@ -66,7 +66,10 @@ void MainWindow::on_startButton_clicked()
         address = ui->manualAddress->text();
 
         ProgressDialog *progDialog = new ProgressDialog(this);
-        progDialog->exec();
+        QCoreApplication::processEvents();
+        progDialog->show();
+        progDialog->update();
+        progDialog->StartRip();
     }
 }
 

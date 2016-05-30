@@ -9,6 +9,9 @@
  * instruments to SoundFont 2.0 (.sf2) format.
  */
 
+#include <QApplication>
+#include <QDir>
+#include <QProcess>
 #include <QString>
 #include <QStringList>
 #include <stdlib.h>
@@ -177,6 +180,7 @@ int mus_ripper(int argc, string argv[])
     // If the user hasn't provided an address manually, we'll try to automatically detect it
     if(!song_tbl_ptr)
     {
+        QCoreApplication::processEvents();
         // Auto-detect address of sappy engine
         string sappy_detector_cmd = inGBA_path;
 #ifdef QT_DEBUG
@@ -298,6 +302,7 @@ int mus_ripper(int argc, string argv[])
     {
         if(song_list[i] != song_tbl_end_ptr)
         {
+            QCoreApplication::processEvents();
             unsigned int bank_index = distance(sound_bank_list.begin(), sound_bank_index_list[i]);
             string seq_rip_cmd = "song_ripper\n" + inGBA_path + "\n" + outPath + "/" + name;
 
@@ -320,22 +325,18 @@ int mus_ripper(int argc, string argv[])
 
             QStringList argList = QString::fromStdString(seq_rip_cmd).split("\n");
 
-            int i = 0;
-            int size = argList.size();
-            string c[size];
-            foreach(QString s, argList)
-            {
-                c[i] = s.toStdString();
-                i++;
-            }
-
             printf("Song %u\n", i);
 #ifdef QT_DEBUG
             printf("DEBUG : Going to call system(%s)\n", seq_rip_cmd.c_str());
 #endif
             //if(!system(seq_rip_cmd.c_str()))
-            if(!song_ripper(size, c))
-                puts("An error has occured.");
+            QProcess *songripper = new QProcess();
+            songripper->setProgram(QDir::currentPath() + "/gba_mus_ripper_gui");
+            songripper->setArguments(argList);
+            songripper->start();
+            songripper->waitForFinished();
+            if(songripper->exitCode() != 0)
+                puts("An error occurred.");
         }
     }
     delete[] sound_bank_index_list;
@@ -345,6 +346,7 @@ int mus_ripper(int argc, string argv[])
         // Rips each sound bank in a different file/folder
         for(bank_t j=sound_bank_list.begin(); j!=sound_bank_list.end(); ++j)
         {
+            QCoreApplication::processEvents();
             unsigned int bank_index = distance(sound_bank_list.begin(), j);
 
             string sbnumber = dec3(bank_index);
@@ -359,20 +361,17 @@ int mus_ripper(int argc, string argv[])
 
             QStringList argList = QString::fromStdString(sf_rip_args).split("\n");
 
-            int i = 0;
-            int size = argList.size();
-            char *c[size];
-            foreach(QString s, argList)
-            {
-                c[i] = s.toLocal8Bit().data();
-                i++;
-            }
-
 #ifdef QT_DEBUG
             printf("DEBUG : Goint to call system(%s)\n", sf_rip_args.c_str());
 #endif
             //system(sf_rip_args.c_str());
-            sound_font_ripper(size, c);
+            QProcess *sf2ripper = new QProcess();
+            sf2ripper->setProgram(QDir::currentPath() + "/gba_mus_ripper_gui");
+            sf2ripper->setArguments(argList);
+            sf2ripper->start();
+            sf2ripper->waitForFinished();
+            if(sf2ripper->exitCode() != 0)
+                puts("An error has occured.");
         }
     }
     else
@@ -380,6 +379,7 @@ int mus_ripper(int argc, string argv[])
         // Rips each sound bank in a single soundfont file
         // Build argument list to call sound_font_ripper
         // Output sound font named after the input ROM
+        QCoreApplication::processEvents();
         string sf_rip_args = "sound_font_ripper\n" + inGBA_path + "\n" + outPath + "/" + name + '/' + name + ".sf2";
         if(sample_rate) sf_rip_args += "\n-s" + to_string(sample_rate);
         if(main_volume) sf_rip_args += "\n-mv" + to_string(main_volume);
@@ -392,22 +392,19 @@ int mus_ripper(int argc, string argv[])
 
         QStringList argList = QString::fromStdString(sf_rip_args).split("\n");
 
-        int i = 0;
-        int size = argList.size();
-        char *c[size];
-        foreach(QString s, argList)
-        {
-            c[i] = s.toLocal8Bit().data();
-            i++;
-        }
-
         // Call sound font ripper
         #ifdef QT_DEBUG
         printf("DEBUG : Going to call system(%s)\n", sf_rip_args.c_str());
 #endif
         //system(sf_rip_args.c_str());
-        sound_font_ripper(size, c);
+        QProcess *sf2ripper = new QProcess();
+        sf2ripper->setProgram(QDir::currentPath() + "/gba_mus_ripper_gui");
+        sf2ripper->setArguments(argList);
+        sf2ripper->start();
+        sf2ripper->waitForFinished();
+        if(sf2ripper->exitCode() != 0)
+            puts("An error has occured.");
     }
-    puts("Rip completed !");
-    exit(0);
+    puts("Rip completed!");
+    return 0;
 }

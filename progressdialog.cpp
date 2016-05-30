@@ -12,7 +12,6 @@ ProgressDialog::ProgressDialog(MainWindow *parent) : QDialog(parent), ui(new Ui:
     romPath = parent->romPath;
     outPath = parent->outputPath;
 
-    QString nativeArgs;
     nativeArgs += romPath;
     nativeArgs += "\n-o\n";
     nativeArgs += outPath;
@@ -29,7 +28,10 @@ ProgressDialog::ProgressDialog(MainWindow *parent) : QDialog(parent), ui(new Ui:
         nativeArgs += "\n-raw";
     if (parent->adrFlag && !parent->address.isEmpty())
         nativeArgs += "\n-adr\n" + parent->address;
+}
 
+void ProgressDialog::StartRip()
+{
     QStringList argList = nativeArgs.split("\n");
 
     int i = 0;
@@ -50,15 +52,16 @@ ProgressDialog::ProgressDialog(MainWindow *parent) : QDialog(parent), ui(new Ui:
     ripper->start();
     */
 
-    mus_ripper(size, c);
+    Finish(mus_ripper(size, c));
+    close();
 }
 
-void ProgressDialog::Finish()
+void ProgressDialog::Finish(int exitCode)
 {
     QMessageBox *resultMsg = new QMessageBox(this);
 
     ui->progressBar->setMaximum(100);
-    if (ripper->exitCode() == 0)
+    if (exitCode == 0)
     {
         ui->label->setText("Extraction completed!");
         ui->progressBar->setValue(100);
@@ -77,7 +80,7 @@ void ProgressDialog::Finish()
         ui->progressBar->setValue(0);
         resultMsg->setIcon(QMessageBox::Critical);
 
-        switch (ripper->exitCode())
+        switch (exitCode)
         {
         case -1:
             resultMsg->setText("Invalid arguments passed to gba_mus_ripper!");

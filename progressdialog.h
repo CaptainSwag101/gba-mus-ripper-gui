@@ -23,15 +23,17 @@ class ProgressDialog : public QDialog
 public:
     explicit ProgressDialog(MainWindow *parent);
     ~ProgressDialog();
+    void StartRip();
 
 public slots:
-    void Finish();
+    void Finish(int exitCode);
 
 private:
     Ui::ProgressDialog *ui;
     QProcess *ripper;
     QString romPath;
     QString outPath;
+    QString nativeArgs;
 };
 
 #endif // PROGRESSDIALOG_H

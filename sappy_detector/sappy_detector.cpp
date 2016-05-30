@@ -11,9 +11,7 @@
 
 #include "sappy_detector.h"
 
-typedef const char *const string;
-
-string sr_lookup[16] =
+const char *const sr_lookup[16] =
 {
 	"invalid", "5734 Hz", "7884 Hz", "10512 Hz", "13379 Hz", "15768 Hz", "18157 Hz",
 	"21024 Hz", "26758 Hz", "31536 Hz", "36314 Hz", "40137 Hz", "42048 Hz", "invalid", "invalid", "invalid"
@@ -26,7 +24,7 @@ static void print_instructions()
 	   "GBA Sappy Engine Detector (c) 2015 by Bregalad and loveemu\n"
 	   "Usage : sappy_detector game.gba\n"
 	);
-	exit(0);
+    return;
 }
 
 static uint8_t m4a_bin_selectsong[0x1E] =
@@ -119,7 +117,7 @@ static long m4a_searchblock(uint8_t *gbarom, size_t gbasize)
 		m4a_selectsong_offset = memsearch(gbarom, gbasize, m4a_bin_selectsong, sizeof(m4a_bin_selectsong), m4a_selectsong_search_offset, 1, 0);
 		if (m4a_selectsong_offset != -1)
 		{
-#ifdef _DEBUG
+#ifdef QT_DEBUG
 			fprintf(stdout, "selectsong candidate: $%08X\n", m4a_selectsong_offset);
 #endif
 
@@ -127,7 +125,7 @@ static long m4a_searchblock(uint8_t *gbarom, size_t gbasize)
 			uint32_t m4a_songtable_address = read_u32(&gbarom[m4a_selectsong_offset + M4A_OFFSET_SONGTABLE]);
 			if (!is_gba_rom_address(m4a_songtable_address))
 			{
-#ifdef _DEBUG
+#ifdef QT_DEBUG
 				fprintf(stdout, "Song table address error: not a ROM address $%08X\n", m4a_songtable_address);
 #endif
 				m4a_selectsong_search_offset = m4a_selectsong_offset + 1;
@@ -136,7 +134,7 @@ static long m4a_searchblock(uint8_t *gbarom, size_t gbasize)
 			uint32_t m4a_songtable_offset_tmp = gba_address_to_offset(m4a_songtable_address);
 			if (!is_valid_offset(m4a_songtable_offset_tmp + 4 - 1, gbasize))
 			{
-#ifdef _DEBUG
+#ifdef QT_DEBUG
 				fprintf(stdout, "Song table address error: address out of range $%08X\n", m4a_songtable_address);
 #endif
 				m4a_selectsong_search_offset = m4a_selectsong_offset + 1;
@@ -161,14 +159,14 @@ static long m4a_searchblock(uint8_t *gbarom, size_t gbasize)
 
 				if (!is_gba_rom_address(songaddr))
 				{
-#ifdef _DEBUG
+#ifdef QT_DEBUG
 					fprintf(stdout, "Song address error: not a ROM address $%08X\n", songaddr);
 #endif
 					break;
 				}
 				if (!is_valid_offset(gba_address_to_offset(songaddr) + 4 - 1, gbasize))
 				{
-#ifdef _DEBUG
+#ifdef QT_DEBUG
 					fprintf(stdout, "Song address error: address out of range $%08X\n", songaddr);
 #endif
 					break;
@@ -251,7 +249,7 @@ static bool test_pointer_validity(uint32_t *data, uint32_t inGBA_length)
 	     &&((data[0] & 0xff000000) == 0);
 }
 
-int sappy_detector(const int argc, std::string argv)
+int sappy_detector(const int argc, string argv)
 {
     if(argc != 1) print_instructions();
 	puts("Sappy sound engine detector (c) 2014 by Bregalad and loveemu\n");
@@ -260,7 +258,7 @@ int sappy_detector(const int argc, std::string argv)
 	if(!inGBA)
 	{
         fprintf(stderr, "Error : File %s can't be opened for reading.\n", argv.c_str());
-		exit(0);
+        return NULL;
 	}
 
 	/* Get the size of the input GBA file */
@@ -271,7 +269,7 @@ int sappy_detector(const int argc, std::string argv)
 	if(!inGBA_dump)
 	{
 		fprintf(stderr, "Error, can't allocate memory for ROM dump.\n");
-		exit(0);
+        return NULL;
 	}
 
 	fseek(inGBA, 0L, SEEK_SET);
@@ -279,7 +277,7 @@ int sappy_detector(const int argc, std::string argv)
 	if(errcode != inGBA_length)
 	{
 		fprintf(stderr, "Error, can't dump ROM file. %x\n", errcode);
-		exit(0);
+        return NULL;
 	}
 	fclose(inGBA);
 
@@ -289,7 +287,7 @@ int sappy_detector(const int argc, std::string argv)
 	{
 		/* If no address were told manually and nothing was detected.... */
 		puts("No sound engine was found.");
-		exit(0);
+        return NULL;
 	}
 	printf("Sound engine detected at offset 0x%x\n", offset);
 
@@ -301,7 +299,7 @@ int sappy_detector(const int argc, std::string argv)
 	if(!valid_m16 && !valid_m32)
 	{
 		puts("Only a partial sound engine was found.");
-		exit(0);
+        return NULL;
 	}
 	offset -= valid_m16 ? 16 : 32;
 
