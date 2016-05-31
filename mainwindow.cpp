@@ -15,8 +15,6 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     setWindowFlags((windowFlags() | Qt::CustomizeWindowHint) & ~Qt::WindowMaximizeButtonHint);
     setFixedSize(width(), height());
-    ui->romPathEdit->setText("C:/Users/jpmac/Desktop/Emulators/1636 - Pokemon Fire Red (U)(Squirrels).gba");
-    ui->outputPathEdit->setText("C:/Users/jpmac/Desktop/Emulators");
 }
 
 MainWindow::~MainWindow()
