@@ -195,12 +195,15 @@ int mus_ripper(int argc, string argv[])
         int sound_engine_adr = sappy_detector(1, sappy_detector_cmd);
 
         // Exit if no sappy engine was found
-        if(!sound_engine_adr) exit(-4);
+        if(!sound_engine_adr)
+        {
+            return -4;
+        }
 
         if(fseek(inGBA, sound_engine_adr, SEEK_SET))
         {
             cout << stderr << "Error: Invalid offset within input GBA file: 0x" <<  sound_engine_adr << ".\n";
-            exit(-5);
+            return -5;
         }
 
         // Engine parameter's word
@@ -228,7 +231,7 @@ int mus_ripper(int argc, string argv[])
     if(song_tbl_ptr >= inGBA_size)
     {
         cout << stderr << "Fatal error: Song table at 0x" <<  song_tbl_ptr << " is past the end of the file.\n";
-        exit(-6);
+        return -6;
     }
 
     cout << "Parsing song table...";
@@ -240,7 +243,7 @@ int mus_ripper(int argc, string argv[])
     if(fseek(inGBA, song_tbl_ptr, SEEK_SET))
     {
         cout << stderr << "Fatal error: Can't seek to song table at: 0x" <<  song_tbl_ptr << ".\n";
-        exit(-7);
+        return -7;
     }
 
     // Ignores entries which are made of 0s at the start of the song table
@@ -346,7 +349,7 @@ int mus_ripper(int argc, string argv[])
             songripper->setArguments(argList);
             songripper->start();
             songripper->waitForFinished();
-            if(songripper->exitCode() != 0)
+            if(songripper->exitCode() < 0)
                 cout << "An error has occurred.";
         }
     }

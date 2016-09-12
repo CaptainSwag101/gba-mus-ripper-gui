@@ -54,7 +54,7 @@ static void print_instructions()
 		"      magically turn the soundfont into a General MIDI compliant soundfont.\n"
 		"-mv : Main volume for sample instruments. Range : 1-15. Game Boy channels are unnaffected.\n"
 	);
-	exit(0);
+    exit(-1);
 }
 
 
@@ -609,7 +609,7 @@ int sound_font_ripper(int argc, char *argv[])
 		|| fread(instr_data, 4, ninstr*3, inGBA) != ninstr*3)				// Read entire sound bank in memory
 		{
 			fprintf(stderr, "Error : Invalid position within input GBA file : 0x%x\n", current_address);
-			exit(0);
+            exit(-3);
 		}
 
 		// Decode all instruments

@@ -75,7 +75,7 @@ static void print_instructions()
         "      but shouldn't be used to get an exact dump of sequence data.\n"
         "It is possible, but not recommended, to use more than one of these flags at a time.\n"
     ;
-    exit(0);
+    exit(-1);
 }
 
 static void add_simultaneous_note()
@@ -549,7 +549,7 @@ static uint32_t parseArguments(const int argv, const char *const args[])
     if(!inGBA)
     {
         cout << stderr << "Can't open file " << args[0] << " for reading.\n";
-        exit(0);
+        exit(-2);
     }
 
     for(int i = 3; i < argv; i++)
@@ -593,14 +593,14 @@ int song_ripper(int argc, char *argv[])
     if(fseek(inGBA, base_address, SEEK_SET))
     {
         cout << stderr << "Can't seek to the base address 0x" << base_address << ".\n";
-        exit(0);
+        exit(-3);
     }
 
     int track_amnt = fgetc(inGBA);
     if(track_amnt < 1 || track_amnt > 16)
     {
         cout << stderr << "Invalid amount of tracks: " << track_amnt << "! (must be 1-16).\n";
-        exit(0);
+        exit(-4);
     }
     cout << track_amnt << " tracks.\n";
 
@@ -610,7 +610,7 @@ int song_ripper(int argc, char *argv[])
     if(!outMID)
     {
         cout << stderr << "Can't write on file " << argv[2] << ".\n";
-        exit(0);
+        exit(-5);
     }
 
     cout << "Converting...";

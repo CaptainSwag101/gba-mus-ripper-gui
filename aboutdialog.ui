@@ -57,7 +57,7 @@
        </sizepolicy>
       </property>
       <property name="text">
-       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;GBA Mus Ripper GUI&lt;/p&gt;&lt;p&gt;By James &amp;quot;CaptainSwag101&amp;quot; Pelster&lt;/p&gt;&lt;p&gt;A graphical tool based off my fork of Bregalad's tool, &amp;quot;gba_mus_riper&amp;quot;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;GBA Mus Ripper GUI&lt;/p&gt;&lt;p&gt;By James &amp;quot;CaptainSwag101&amp;quot; Pelster&lt;/p&gt;&lt;p&gt;A graphical tool based on my fork of Bregalad's tool, &amp;quot;gba_mus_riper&amp;quot;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
       </property>
      </widget>
     </item>
