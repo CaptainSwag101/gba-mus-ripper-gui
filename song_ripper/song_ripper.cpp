@@ -6,6 +6,14 @@
  */
 
 #include "song_ripper.h"
+#include <iostream>
+#include <algorithm>
+#include <forward_list>
+#include <math.h>
+#include <stdlib.h>
+#include <string.h>
+
+using namespace std;
 
 class Note;
 // Global variables for this program
@@ -33,7 +41,7 @@ static bool lfo_hack[16];
 static unsigned int simultaneous_notes_ctr = 0;
 static unsigned int simultaneous_notes_max = 0;
 
-static std::forward_list<Note> notes_playing;
+static forward_list<Note> notes_playing;
 
 static int bank_number;
 static bool bank_used = false;
@@ -50,7 +58,7 @@ static void process_event(int track);
 
 static void print_instructions()
 {
-    puts(
+    cout <<
         "Rips sequence data from a GBA game using sappy sound engine to MIDI (.mid) format.\n"
         "\nUsage : song_ripper infile.gba outfile.mid song_adress [-b1 -gm -gs -xg]\n"
         "-b : Bank : forces all patches to be in the specified bank (0-127)\n"
@@ -66,7 +74,7 @@ static void print_instructions()
         "      when commands are given. Like -lv, this should be used to have the output \"sound\" like the original song,\n"
         "      but shouldn't be used to get an exact dump of sequence data.\n"
         "It is possible, but not recommended, to use more than one of these flags at a time.\n"
-    );
+    ;
     exit(0);
 }
 
@@ -540,14 +548,14 @@ static uint32_t parseArguments(const int argv, const char *const args[])
     inGBA = fopen(args[0], "rb");
     if(!inGBA)
     {
-        fprintf(stderr, "Can't open file %s for reading.\n", args[0]);
+        cout << stderr << "Can't open file " << args[0] << " for reading.\n";
         exit(0);
     }
 
     for(int i = 3; i < argv; i++)
     {
-        printf("arg #%d = %s\n", i, args[i]);
-        printf("\n");
+        cout << "arg #" << i << " = " << args[i] << "\n";
+        cout << "\n";
         if(args[i][0] == '-')
         {
             if(args[i][1] == 'b')
@@ -579,33 +587,33 @@ static uint32_t parseArguments(const int argv, const char *const args[])
 int song_ripper(int argc, char *argv[])
 {
     FILE *outMID;
-    puts("GBA ROM sequence ripper (c) 2012 Bregalad");
+    cout << "GBA ROM sequence ripper (c) 2012 Bregalad";
     uint32_t base_address = parseArguments(argc-1, argv+1);
 
     if(fseek(inGBA, base_address, SEEK_SET))
     {
-        fprintf(stderr, "Can't seek to the base adress 0x%x.\n", base_address);
+        cout << stderr << "Can't seek to the base address 0x" << base_address << ".\n";
         exit(0);
     }
 
     int track_amnt = fgetc(inGBA);
     if(track_amnt < 1 || track_amnt > 16)
     {
-        fprintf(stderr, "Invalid amount of tracks %d ! (must be 1-16)\n", track_amnt);
+        cout << stderr << "Invalid amount of tracks: " << track_amnt << "! (must be 1-16).\n";
         exit(0);
     }
-    printf("%u tracks.\n", track_amnt);
+    cout << track_amnt << " tracks.\n";
 
     // Open output file once we know the pointer points to correct data
     //(this avoids creating blank files when there is an error)
     outMID = fopen(argv[2], "wb");
     if(!outMID)
     {
-        fprintf(stderr, "Can't write on file %s\n", argv[2]);
+        cout << stderr << "Can't write on file " << argv[2] << ".\n";
         exit(0);
     }
 
-    printf("Converting...");
+    cout << "Converting...";
 
     if(rc)
     {	// Make the drum channel last in the list, hopefully reducing the risk of it being used
@@ -673,7 +681,7 @@ int song_ripper(int argc, char *argv[])
     {
         if(i-- == 0)
         {	// Security thing to avoid infinite loop in case things goes wrong
-            puts("Time out!");
+            cout << "Time out!";
             break;
         }
     }
@@ -681,12 +689,12 @@ int song_ripper(int argc, char *argv[])
     // If a loop was detected this is its end
     if(loop_flag) midi.add_marker("loopEnd");
 
-    printf("Maximum simultaneous notes : %d\n", simultaneous_notes_max);
+    cout << "Maximum simultaneous notes: " << simultaneous_notes_max << "\n";
 
-    printf("Dump complete. Now outputting MIDI file...");
+    cout << "Dump complete. Now outputting MIDI file...";
     midi.write(outMID);
     // Close files
     fclose(inGBA);
-    puts(" Done!");
+    cout << "Done!";
     return instr_bank_address;
 }

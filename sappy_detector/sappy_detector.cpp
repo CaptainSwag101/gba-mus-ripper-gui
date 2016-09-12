@@ -22,7 +22,7 @@ static void print_instructions()
 	puts
 	(
 	   "GBA Sappy Engine Detector (c) 2015 by Bregalad and loveemu\n"
-	   "Usage : sappy_detector game.gba\n"
+       "Usage: sappy_detector game.gba\n"
 	);
     return;
 }
@@ -99,7 +99,7 @@ static uint32_t gba_address_to_offset(uint32_t address)
 {
 	if (!is_gba_rom_address(address))
 	{
-		fprintf(stderr, "Warning: the address $%08X is not ROM address\n", address);
+        fprintf(stderr, "Warning: the address $%08X is not a valid ROM address!\n", address);
 	}
 	return address & 0x01FFFFFF;
 }
@@ -252,13 +252,13 @@ static bool test_pointer_validity(uint32_t *data, uint32_t inGBA_length)
 int sappy_detector(const int argc, string argv)
 {
     if(argc != 1) print_instructions();
-	puts("Sappy sound engine detector (c) 2014 by Bregalad and loveemu\n");
+    puts("GBA Sappy Engine Detector (c) 2015 by Bregalad and loveemu\n");
 
     FILE *inGBA = fopen(argv.c_str(), "rb");
 	if(!inGBA)
 	{
-        fprintf(stderr, "Error : File %s can't be opened for reading.\n", argv.c_str());
-        return NULL;
+        fprintf(stderr, "Error: File %s can't be opened for reading.\n", argv.c_str());
+        return -1;
 	}
 
 	/* Get the size of the input GBA file */
@@ -268,16 +268,16 @@ int sappy_detector(const int argc, string argv)
 	uint8_t *inGBA_dump = (uint8_t*)malloc(inGBA_length);
 	if(!inGBA_dump)
 	{
-		fprintf(stderr, "Error, can't allocate memory for ROM dump.\n");
-        return NULL;
+        fprintf(stderr, "Error: can't allocate memory for ROM dump.\n");
+        return -2;
 	}
 
 	fseek(inGBA, 0L, SEEK_SET);
 	size_t errcode = fread(inGBA_dump, 1, inGBA_length, inGBA);
 	if(errcode != inGBA_length)
 	{
-		fprintf(stderr, "Error, can't dump ROM file. %x\n", errcode);
-        return NULL;
+        fprintf(stderr, "Error: can't dump ROM file. %x\n", errcode);
+        return -3;
 	}
 	fclose(inGBA);
 
@@ -287,9 +287,9 @@ int sappy_detector(const int argc, string argv)
 	{
 		/* If no address were told manually and nothing was detected.... */
 		puts("No sound engine was found.");
-        return NULL;
+        return -4;
 	}
-	printf("Sound engine detected at offset 0x%x\n", offset);
+    printf("Sound engine detected at offset: 0x%x\n", offset);
 
 	/* Test validity of engine offset with -16 and -32 */
 	bool valid_m16 = test_pointer_validity((uint32_t*)(inGBA_dump + offset - 16), inGBA_length);	// For most games
@@ -299,7 +299,7 @@ int sappy_detector(const int argc, string argv)
 	if(!valid_m16 && !valid_m32)
 	{
 		puts("Only a partial sound engine was found.");
-        return NULL;
+        return -5;
 	}
 	offset -= valid_m16 ? 16 : 32;
 
@@ -308,14 +308,14 @@ int sappy_detector(const int argc, string argv)
 	sound_engine_param_t params = sound_engine_param(data[0]);
 
 	//Read # of song levels
-	printf("# of song levels : %d\n", data[1]);
+    printf("# of song levels: %d\n", data[1]);
 
 	// At this point we can be certain we detected the real thing.
 	printf
 	(
-		"Engine parameters :\n"
-		"Main Volume : %u Polyphony : %u channels, Dac : %u bits, Sampling rate : %s\n"
-		"Song table located at : 0x%x\n",
+        "Engine parameters:\n"
+        "Main Volume: %u Polyphony: %u channels, Dac: %u bits, Sampling rate: %s\n"
+        "Song table located at: 0x%x\n",
 		params.main_vol,
 		params.polyphony,
 		17-params.dac_bits,

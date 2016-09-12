@@ -8,22 +8,8 @@ QT       += core gui
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-TARGET = gba-mus-ripper-gui
+TARGET = gba_mus_ripper_gui
 TEMPLATE = app
-
-
-SOURCES += main.cpp\
-        mainwindow.cpp \
-    gba_mus_ripper/gba_mus_ripper.cpp \
-    sappy_detector/sappy_detector.cpp \
-    song_ripper/midi.cpp \
-    song_ripper/song_ripper.cpp \
-    sound_font_ripper/gba_instr.cpp \
-    sound_font_ripper/gba_samples.cpp \
-    sound_font_ripper/sf2.cpp \
-    sound_font_ripper/sound_font_ripper.cpp \
-    aboutdialog.cpp \
-    progressdialog.cpp
 
 HEADERS  += mainwindow.h \
     gba_mus_ripper/gba_mus_ripper.h \
@@ -40,10 +26,25 @@ HEADERS  += mainwindow.h \
     hex_string.h \
     progressdialog.h
 
+SOURCES += main.cpp\
+        mainwindow.cpp \
+    gba_mus_ripper/gba_mus_ripper.cpp \
+    sappy_detector/sappy_detector.cpp \
+    song_ripper/midi.cpp \
+    song_ripper/song_ripper.cpp \
+    sound_font_ripper/gba_instr.cpp \
+    sound_font_ripper/gba_samples.cpp \
+    sound_font_ripper/sf2.cpp \
+    sound_font_ripper/sound_font_ripper.cpp \
+    aboutdialog.cpp \
+    progressdialog.cpp
+
 FORMS    += mainwindow.ui \
     aboutdialog.ui \
     progressdialog.ui
 
-DISTFILES += \
-    sound_font_ripper/goldensun_synth.raw \
-    sound_font_ripper/psg_data.raw
+DISTFILES += GBA_Mus_Ripper_GUI.ico \
+    goldensun_synth.raw \
+    psg_data.raw
+
+win32:RC_ICONS += GBA_Mus_Ripper_GUI.ico

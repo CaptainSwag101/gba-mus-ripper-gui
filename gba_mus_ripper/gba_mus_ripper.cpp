@@ -42,10 +42,10 @@ static const int sample_rates[] = {-1, 5734, 7884, 10512, 13379, 15768, 18157, 2
 
 static void print_instructions()
 {
-    puts(
-                "  /=================================================================\\\n"
-                "-<   GBA Mus Ripper 3.4 (c) 2015 Bregalad, (c) 2016 CaptainSwag101   >-\n"
-                "  \\=================================================================/\n\n"
+    cout <<
+                "  /========================================================\\\n"
+                "-<   GBA Mus Ripper 3.4 (c) 2016 Bregalad, CaptainSwag101   >-\n"
+                "  \\========================================================/\n\n"
                 "Usage : gba_mus_ripper game.gba [-o output path] [flags] [address]\n\n"
                 "-o   : Output path. All MIDIs and soundfonts will be ripped to a subfolder inside this directory.\n"
                 "-gm  : Give General MIDI names to presets. Note that this will only change the names and will NOT\n"
@@ -59,7 +59,7 @@ static void print_instructions()
                 "       and without simulating vibratos.\n"
                 "-adr : Force adress of the song table manually. This is required for manually dumping music data\n"
                 "       from ROMs where the location can't be detected automatically.\n"
-                );
+                ;
     exit(-1);
 }
 
@@ -85,7 +85,7 @@ static string dec3(unsigned int n)
     return s;
 }
 
-static void parse_args(int argc, string argv[])
+static int parse_args(int argc, string argv[])
 {
     const char *args[argc];
     for (int c = 0; c < argc; c++)
@@ -119,8 +119,8 @@ static void parse_args(int argc, string argv[])
                 raw = true;
             else
             {
-                fprintf(stderr, "Error : Unknown command line option : %s. Try with -help to get information.\n", args[i]);
-                exit(-1);
+                cout << stderr << "Error: Unknown command line option: " << args[i] << ". Try with -help to get information.\n";
+                return -1;
             }
         }
         // Convert given address to binary, use it instead of automatically detected one
@@ -130,8 +130,8 @@ static void parse_args(int argc, string argv[])
             inGBA = fopen(args[i], "rb");
             if(!inGBA)
             {
-                fprintf(stderr, "Error : Can't open file %s for reading.\n", args[i]);
-                exit(-2);
+                cout << stderr << "Error: Can't open file " << args[i] << " for reading.\n";
+                return -2;
             }
 
             // Name is filename without the extention and without path
@@ -149,28 +149,34 @@ static void parse_args(int argc, string argv[])
             song_tbl_ptr = strtoul(args[i], 0, 0);
             if(errno)
             {
-                fprintf(stderr, "Error : %s is not a valid song table address.\n", args[i]);
-                exit(-3);
+                cout << stderr << "Error: " << args[i] << " is not a valid song table address.\n";
+                return -3;
             }
             song_tbl_found = true;
         }
         else
         {
-            fprintf(stderr, "Error : Don't know what to do with %s. Try with -help to get more information.\n", args[i]);
-            exit(-1);
+            cout << stderr << "Error: Don't know what to do with " << args[i] << ". Try with -help to get more information.\n";
+            return -4;
         }
     }
     if(!path_found)
     {
-        fputs("Error : No input GBA file. Try with -help to get more information.\n", stderr);
-        exit(-1);
+        cout << stderr << "Error: No input GBA file. Try with -help to get more information.\n";
+        return -1;
     }
+
+    return 0;
 }
 
 int mus_ripper(int argc, string argv[])
 {
     // Parse arguments (without program name)
-    parse_args(argc, argv);
+    int parse_result = parse_args(argc, argv);
+    if (parse_result < 0)
+    {
+        return parse_result;
+    }
 
     // Compute program prefix (should be "", "./", "../" or whathever)
     string prg_name = argv[0];
@@ -184,7 +190,7 @@ int mus_ripper(int argc, string argv[])
         // Auto-detect address of sappy engine
         string sappy_detector_cmd = inGBA_path;
 #ifdef QT_DEBUG
-        printf("DEBUG : Going to call system(%s)\n", sappy_detector_cmd.c_str());
+        cout << "DEBUG: Going to call system(" << sappy_detector_cmd << ")\n";
 #endif
         int sound_engine_adr = sappy_detector(1, sappy_detector_cmd);
 
@@ -193,7 +199,7 @@ int mus_ripper(int argc, string argv[])
 
         if(fseek(inGBA, sound_engine_adr, SEEK_SET))
         {
-            fprintf(stderr, "Error : Invalid offset within input GBA file : 0x%x\n", sound_engine_adr);
+            cout << stderr << "Error: Invalid offset within input GBA file: 0x" <<  sound_engine_adr << ".\n";
             exit(-5);
         }
 
@@ -208,7 +214,7 @@ int mus_ripper(int argc, string argv[])
         // Compute address of song table
         uint32_t song_levels;			// Read # of song levels
         fread(&song_levels, 4, 1, inGBA);
-        printf("# of song levels : %d\n", song_levels);
+        cout << "# of song levels: " << song_levels  << "\n";
         song_tbl_ptr = get_GBA_pointer() + 12 * song_levels;
     }
 
@@ -221,11 +227,11 @@ int mus_ripper(int argc, string argv[])
 
     if(song_tbl_ptr >= inGBA_size)
     {
-        fprintf(stderr, "Fatal error : Song table at 0x%x is past the end of the file.\n", song_tbl_ptr);
+        cout << stderr << "Fatal error: Song table at 0x" <<  song_tbl_ptr << " is past the end of the file.\n";
         exit(-6);
     }
 
-    printf("Parsing song table...");
+    cout << "Parsing song table...";
     // New list of songs
     vector<uint32_t> song_list;
     // New list of sound banks
@@ -233,7 +239,7 @@ int mus_ripper(int argc, string argv[])
 
     if(fseek(inGBA, song_tbl_ptr, SEEK_SET))
     {
-        fprintf(stderr, "Fatal error : Can't seek to song table at : 0x%x\n", song_tbl_ptr);
+        cout << stderr << "Fatal error: Can't seek to song table at: 0x" <<  song_tbl_ptr << ".\n";
         exit(-7);
     }
 
@@ -265,7 +271,7 @@ int mus_ripper(int argc, string argv[])
     // End of song table
     uint32_t song_tbl_end_ptr = 8 * i + song_tbl_ptr;
 
-    puts("Collecting sound bank list...");
+    cout << "Collecting sound bank list...";
 
     typedef set<uint32_t>::iterator bank_t;
     bank_t *sound_bank_index_list = new bank_t[song_list.size()];
@@ -325,18 +331,23 @@ int mus_ripper(int argc, string argv[])
 
             QStringList argList = QString::fromStdString(seq_rip_cmd).split("\n");
 
-            printf("Song %u\n", i);
+            cout << "Song " << i << "\n";
 #ifdef QT_DEBUG
-            printf("DEBUG : Going to call system(%s)\n", seq_rip_cmd.c_str());
+            cout << "DEBUG: Going to call system(" << seq_rip_cmd << ")\n";
 #endif
             //if(!system(seq_rip_cmd.c_str()))
             QProcess *songripper = new QProcess();
-            songripper->setProgram(QDir::currentPath() + "/gba_mus_ripper_gui");
+            if (!QFile::exists(QDir::toNativeSeparators(QDir::currentPath() + "/gba_mus_ripper_gui.exe")))
+            {
+                cout << "Unable to find the GBA Mus Ripper GUI executable!\n";
+                return -8;
+            }
+            songripper->setProgram(QDir::currentPath() + "/gba_mus_ripper_gui.exe");
             songripper->setArguments(argList);
             songripper->start();
             songripper->waitForFinished();
             if(songripper->exitCode() != 0)
-                puts("An error occurred.");
+                cout << "An error has occurred.";
         }
     }
     delete[] sound_bank_index_list;
@@ -362,16 +373,22 @@ int mus_ripper(int argc, string argv[])
             QStringList argList = QString::fromStdString(sf_rip_args).split("\n");
 
 #ifdef QT_DEBUG
-            printf("DEBUG : Goint to call system(%s)\n", sf_rip_args.c_str());
+            cout << "DEBUG: Going to call system(" << sf_rip_args << ")\n";
 #endif
             //system(sf_rip_args.c_str());
             QProcess *sf2ripper = new QProcess();
-            sf2ripper->setProgram(QDir::currentPath() + "/gba_mus_ripper_gui");
+            if (!QFile::exists(QDir::toNativeSeparators(QDir::currentPath() + "/gba_mus_ripper_gui.exe")))
+            {
+                cout << "Unable to find the GBA Mus Ripper GUI executable!\n";
+                return -8;
+            }
+            sf2ripper->setProgram(QDir::currentPath() + "/gba_mus_ripper_gui.exe");
             sf2ripper->setArguments(argList);
             sf2ripper->start();
             sf2ripper->waitForFinished();
-            if(sf2ripper->exitCode() != 0)
-                puts("An error has occured.");
+            cout << sf2ripper->readAllStandardOutput().toStdString();
+            if (sf2ripper->exitCode() != 0)
+                cout << "An error has occured.";
         }
     }
     else
@@ -394,17 +411,23 @@ int mus_ripper(int argc, string argv[])
 
         // Call sound font ripper
         #ifdef QT_DEBUG
-        printf("DEBUG : Going to call system(%s)\n", sf_rip_args.c_str());
+        cout << "DEBUG: Going to call system(" << sf_rip_args << ")\n";
 #endif
         //system(sf_rip_args.c_str());
         QProcess *sf2ripper = new QProcess();
-        sf2ripper->setProgram(QDir::currentPath() + "/gba_mus_ripper_gui");
+        if (!QFile::exists(QDir::toNativeSeparators(QDir::currentPath() + "/gba_mus_ripper_gui.exe")))
+        {
+            cout << "Unable to find the GBA Mus Ripper GUI executable!\n";
+            return -8;
+        }
+        sf2ripper->setProgram(QDir::currentPath() + "/gba_mus_ripper_gui.exe");
         sf2ripper->setArguments(argList);
         sf2ripper->start();
         sf2ripper->waitForFinished();
+        cout << sf2ripper->readAllStandardOutput().toStdString();
         if(sf2ripper->exitCode() != 0)
-            puts("An error has occured.");
+            cout << "An error has occured.";
     }
-    puts("Rip completed!");
+    cout << "Rip completed!\n";
     return 0;
 }

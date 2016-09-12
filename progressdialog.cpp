@@ -109,6 +109,10 @@ void ProgressDialog::Finish(int exitCode)
         case -7:
             resultMsg->setText("Unable to parse song table.");
             break;
+
+        case -8:
+            resultMsg->setText("Unable to find GBA Mus Ripper GUI executable: " + QDir::toNativeSeparators(QDir::currentPath() + "/gba_mus_ripper_gui.exe"));
+            break;
         }
         resultMsg->exec();
     }
