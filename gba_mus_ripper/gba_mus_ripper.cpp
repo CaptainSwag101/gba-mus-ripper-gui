@@ -340,12 +340,23 @@ int mus_ripper(int argc, string argv[])
 #endif
             //if(!system(seq_rip_cmd.c_str()))
             QProcess *songripper = new QProcess();
+
+#ifdef Q_OS_WIN32
+            if (!QFile::exists(QDir::toNativeSeparators(QDir::currentPath() + "/gba_mus_ripper_gui.exe")))
+            {
+                cout << "Unable to find the " << QDir::toNativeSeparators(QDir::currentPath() + "/gba_mus_ripper_gui.exe").toStdString() << " executable!\n";
+                return -8;
+            }
+            songripper->setProgram(QDir::currentPath() + "/gba_mus_ripper_gui.exe");
+#else
             if (!QFile::exists(QDir::toNativeSeparators(QDir::currentPath() + "/gba_mus_ripper_gui")))
             {
-                cout << "Unable to find the " << QDir::currentPath().toStdString() << "/gba_mus_ripper_gui executable!\n";
+                cout << "Unable to find the " << QDir::toNativeSeparators(QDir::currentPath() + "/gba_mus_ripper_gui").toStdString() << " executable!\n";
                 return -8;
             }
             songripper->setProgram(QDir::currentPath() + "/gba_mus_ripper_gui");
+#endif
+
             songripper->setArguments(argList);
             songripper->start();
             songripper->waitForFinished();
@@ -380,12 +391,23 @@ int mus_ripper(int argc, string argv[])
 #endif
             //system(sf_rip_args.c_str());
             QProcess *sf2ripper = new QProcess();
+
+#ifdef Q_OS_WIN32
+            if (!QFile::exists(QDir::toNativeSeparators(QDir::currentPath() + "/gba_mus_ripper_gui.exe")))
+            {
+                cout << "Unable to find the " << QDir::toNativeSeparators(QDir::currentPath() + "/gba_mus_ripper_gui.exe").toStdString() << " executable!\n";
+                return -8;
+            }
+            sf2ripper->setProgram(QDir::currentPath() + "/gba_mus_ripper_gui.exe");
+#else
             if (!QFile::exists(QDir::toNativeSeparators(QDir::currentPath() + "/gba_mus_ripper_gui")))
             {
-                cout << "Unable to find the " << QDir::currentPath().toStdString() << "/gba_mus_ripper_gui executable!\n";
+                cout << "Unable to find the " << QDir::toNativeSeparators(QDir::currentPath() + "/gba_mus_ripper_gui").toStdString() << " executable!\n";
                 return -8;
             }
             sf2ripper->setProgram(QDir::currentPath() + "/gba_mus_ripper_gui");
+#endif
+
             sf2ripper->setArguments(argList);
             sf2ripper->start();
             sf2ripper->waitForFinished();
@@ -413,16 +435,28 @@ int mus_ripper(int argc, string argv[])
         QStringList argList = QString::fromStdString(sf_rip_args).split("\n");
 
         // Call sound font ripper
-        #ifdef QT_DEBUG
+#ifdef QT_DEBUG
         cout << "DEBUG: Going to call system(" << sf_rip_args << ")\n";
 #endif
         //system(sf_rip_args.c_str());
         QProcess *sf2ripper = new QProcess();
-        if (!QFile::exists(QDir::toNativeSeparators(QDir::currentPath() + "/gba_mus_ripper_gui")))
-        {
-            cout << "Unable to find the " << QDir::currentPath().toStdString() << "/gba_mus_ripper_gui executable!\n";
-            return -8;
-        }
+
+#ifdef Q_OS_WIN32
+            if (!QFile::exists(QDir::toNativeSeparators(QDir::currentPath() + "/gba_mus_ripper_gui.exe")))
+            {
+                cout << "Unable to find the " << QDir::toNativeSeparators(QDir::currentPath() + "/gba_mus_ripper_gui.exe").toStdString() << " executable!\n";
+                return -8;
+            }
+            sf2ripper->setProgram(QDir::currentPath() + "/gba_mus_ripper_gui.exe");
+#else
+            if (!QFile::exists(QDir::toNativeSeparators(QDir::currentPath() + "/gba_mus_ripper_gui")))
+            {
+                cout << "Unable to find the " << QDir::toNativeSeparators(QDir::currentPath() + "/gba_mus_ripper_gui").toStdString() << " executable!\n";
+                return -8;
+            }
+            sf2ripper->setProgram(QDir::currentPath() + "/gba_mus_ripper_gui");
+#endif
+
         sf2ripper->setProgram(QDir::currentPath() + "/gba_mus_ripper_gui");
         sf2ripper->setArguments(argList);
         sf2ripper->start();

@@ -83,7 +83,7 @@ void ProgressDialog::Finish(int exitCode)
         switch (exitCode)
         {
         case -1:
-            resultMsg->setText("Invalid arguments passed to gba_mus_ripper!");
+            resultMsg->setText("Invalid arguments passed to gba_mus_ripper_gui!");
             break;
 
         case -2:
@@ -111,7 +111,11 @@ void ProgressDialog::Finish(int exitCode)
             break;
 
         case -8:
+#ifdef Q_OS_WIN32
             resultMsg->setText("Unable to find GBA Mus Ripper GUI executable: " + QDir::toNativeSeparators(QDir::currentPath() + "/gba_mus_ripper_gui.exe"));
+#else
+            resultMsg->setText("Unable to find GBA Mus Ripper GUI executable: " + QDir::toNativeSeparators(QDir::currentPath() + "/gba_mus_ripper_gui"));
+#endif
             break;
         }
         resultMsg->exec();
