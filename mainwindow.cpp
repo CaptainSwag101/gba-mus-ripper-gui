@@ -24,15 +24,6 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_startButton_clicked()
 {
-    /* if (!QFileInfo(QDir::currentPath() + '/' + "gba_mus_ripper.exe").exists())
-    {
-        QMessageBox *errorMsg = new QMessageBox(this);
-        errorMsg->setIcon(QMessageBox::Critical);
-        errorMsg->setText("Unable to find the \"gba_mus_ripper.exe\" executable in this program's directory.\n"
-                          "Unable to extract music.");
-        errorMsg->exec();
-    }
-    else */
     if (ui->romPathEdit->text().isEmpty())
     {
         QMessageBox *errorMsg = new QMessageBox(this);

@@ -273,7 +273,7 @@ int sappy_detector(const int argc, string argv)
 	}
 
 	fseek(inGBA, 0L, SEEK_SET);
-	size_t errcode = fread(inGBA_dump, 1, inGBA_length, inGBA);
+    size_t errcode = fread(inGBA_dump, 1, inGBA_length, inGBA);
 	if(errcode != inGBA_length)
 	{
         fprintf(stderr, "Error: can't dump ROM file. %x\n", errcode);

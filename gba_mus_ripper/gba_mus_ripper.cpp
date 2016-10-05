@@ -340,12 +340,12 @@ int mus_ripper(int argc, string argv[])
 #endif
             //if(!system(seq_rip_cmd.c_str()))
             QProcess *songripper = new QProcess();
-            if (!QFile::exists(QDir::toNativeSeparators(QDir::currentPath() + "/gba_mus_ripper_gui.exe")))
+            if (!QFile::exists(QDir::toNativeSeparators(QDir::currentPath() + "/gba_mus_ripper_gui")))
             {
-                cout << "Unable to find the GBA Mus Ripper GUI executable!\n";
+                cout << "Unable to find the " << QDir::currentPath().toStdString() << "/gba_mus_ripper_gui executable!\n";
                 return -8;
             }
-            songripper->setProgram(QDir::currentPath() + "/gba_mus_ripper_gui.exe");
+            songripper->setProgram(QDir::currentPath() + "/gba_mus_ripper_gui");
             songripper->setArguments(argList);
             songripper->start();
             songripper->waitForFinished();
@@ -380,12 +380,12 @@ int mus_ripper(int argc, string argv[])
 #endif
             //system(sf_rip_args.c_str());
             QProcess *sf2ripper = new QProcess();
-            if (!QFile::exists(QDir::toNativeSeparators(QDir::currentPath() + "/gba_mus_ripper_gui.exe")))
+            if (!QFile::exists(QDir::toNativeSeparators(QDir::currentPath() + "/gba_mus_ripper_gui")))
             {
-                cout << "Unable to find the GBA Mus Ripper GUI executable!\n";
+                cout << "Unable to find the " << QDir::currentPath().toStdString() << "/gba_mus_ripper_gui executable!\n";
                 return -8;
             }
-            sf2ripper->setProgram(QDir::currentPath() + "/gba_mus_ripper_gui.exe");
+            sf2ripper->setProgram(QDir::currentPath() + "/gba_mus_ripper_gui");
             sf2ripper->setArguments(argList);
             sf2ripper->start();
             sf2ripper->waitForFinished();
@@ -418,12 +418,12 @@ int mus_ripper(int argc, string argv[])
 #endif
         //system(sf_rip_args.c_str());
         QProcess *sf2ripper = new QProcess();
-        if (!QFile::exists(QDir::toNativeSeparators(QDir::currentPath() + "/gba_mus_ripper_gui.exe")))
+        if (!QFile::exists(QDir::toNativeSeparators(QDir::currentPath() + "/gba_mus_ripper_gui")))
         {
-            cout << "Unable to find the GBA Mus Ripper GUI executable!\n";
+            cout << "Unable to find the " << QDir::currentPath().toStdString() << "/gba_mus_ripper_gui executable!\n";
             return -8;
         }
-        sf2ripper->setProgram(QDir::currentPath() + "/gba_mus_ripper_gui.exe");
+        sf2ripper->setProgram(QDir::currentPath() + "/gba_mus_ripper_gui");
         sf2ripper->setArguments(argList);
         sf2ripper->start();
         sf2ripper->waitForFinished();
