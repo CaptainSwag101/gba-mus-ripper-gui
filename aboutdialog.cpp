@@ -7,6 +7,10 @@ AboutDialog::AboutDialog(QWidget *parent) :
 {
     ui->setupUi(this);
     setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
+
+    QString timestamp = QString::fromStdString((std::string)BUILD_DATE + " " + (std::string)BUILD_TIME);
+    QDateTime buildDate = QDateTime::fromString(timestamp, "MMM d yyyy HH:mm:ss");
+    ui->label->setText(ui->label->text() + buildDate.toString(Qt::SystemLocaleLongDate) + ")");
 }
 
 AboutDialog::~AboutDialog()
