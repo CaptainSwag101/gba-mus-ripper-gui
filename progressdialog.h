@@ -26,7 +26,7 @@ public:
     void StartRip();
 
 public slots:
-    void Finish(int exitCode);
+    void Finish(int32_t exitCode);
 
 private:
     Ui::ProgressDialog *ui;

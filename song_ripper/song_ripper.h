@@ -3,6 +3,6 @@
 
 #include "midi.h"
 
-int song_ripper(int argc, char *argv[]);
+int32_t song_ripper(int32_t argc, char *argv[]);
 
 #endif // SONG_RIPPER_H

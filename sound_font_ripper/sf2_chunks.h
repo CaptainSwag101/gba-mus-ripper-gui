@@ -41,9 +41,9 @@
 #ifndef SF2_CHUNKS_HPP
 #define SF2_CHUNKS_HPP
 
-#include <stdio.h>
-#include <string.h>
-#include <stdint.h>
+#include <cstdio>
+#include <cstring>
+#include <cstdint>
 #include "sf2.h"
 #include "sf2_types.h"
 #include <vector>
@@ -66,7 +66,7 @@ protected:
 		size(size),			// The chunk starts bank
 		sf2(sf2)			// Link to output SF2 file
 	{
-		for(unsigned int i=0; i < 4; ++i)
+		for(uint32_t i=0; i < 4; ++i)
 			SF2Chunks::name[i] = name[i];
 	}
 
@@ -120,7 +120,7 @@ public:
 	sfBag(SF2 *sf2, bool preset) :
 		sf2(sf2)
 	{
-		if(preset)
+		if (preset)
 		{
 			wGenNdx = sf2->get_pgen_size();
 			wModNdx = sf2->get_pmod_size();
@@ -322,7 +322,7 @@ public:
 		// 2 bytes per sample
 		// Compute size including the 8 samples after loop point
 		// and 46 dummy samples
-		if(loop_flag)
+		if (loop_flag)
 			SF2Chunks::size += (size + 8 + 46) * 2;
 		else
 			SF2Chunks::size += (size + 46) * 2;
@@ -335,7 +335,7 @@ public:
 	{
 		SF2Chunks::write();
 
-		for(unsigned int i=0; i<file_list.size(); i++)
+		for(uint32_t i=0; i<file_list.size(); i++)
 		{
 			// Seek at the start of the sample in input file
 			fseek(file_list[i], pointer_list[i], SEEK_SET);
@@ -351,7 +351,7 @@ public:
 					uint8_t *data = new uint8_t[size_list[i]];
 					fread(data, 1, size_list[i], file_list[i]);
 					// Convert to signed 16 bits
-					for(unsigned int j=0; j < size_list[i]; j++)
+					for(uint32_t j=0; j < size_list[i]; j++)
 						outbuf[j] = (data[j] - 0x80) << 8;
 					delete[] data;
 				}	break;
@@ -362,7 +362,7 @@ public:
 					int8_t *data = new int8_t[size_list[i]];
 					fread(data, 1, size_list[i], file_list[i]);
 
-					for(unsigned int j=0; j < size_list[i]; j++)
+					for(uint32_t j=0; j < size_list[i]; j++)
 						outbuf[j] = data[j] << 8;
 					delete[] data;
 				}	break;
@@ -381,17 +381,17 @@ public:
 						0x0000, 0x0800, 0x1000, 0x1800, 0x2000, 0x2800, 0x3000, 0x3800
 					};
 
-					int num_of_repts = size_list[i]/32;
+					int32_t num_of_repts = size_list[i]/32;
 					// Data is always on 16 bytes
 					uint8_t data[16];
 					fread(data, 1, 16, file_list[i]);
 
-					for(int j=0, l=0; j<16; j++)
+					for(int32_t j=0, l=0; j<16; j++)
 					{
-						for(int k=num_of_repts; k!=0; k--, l++)
+						for(int32_t k=num_of_repts; k!=0; k--, l++)
 							outbuf[l] = conv_tbl[data[j]>>4];
 	
-						for(int k=num_of_repts; k!=0; k--, l++)
+						for(int32_t k=num_of_repts; k!=0; k--, l++)
 							outbuf[l] = conv_tbl[data[j]&0xf];
 					}
 				}	break;
@@ -413,18 +413,18 @@ public:
 					 * until the end of the block is reached.
 					 */
 
-					unsigned int nblocks = size_list[i] / 64;		// 64 samples per block
+					uint32_t nblocks = size_list[i] / 64;		// 64 samples per block
 
 					char (*data)[33] = new char[nblocks][33];
 					fread(data, 33, nblocks, file_list[i]);
 
-					for(unsigned int block=0; block < nblocks; ++block)
+					for(uint32_t block=0; block < nblocks; ++block)
 					{
 						int8_t sample = data[block][0];
 						outbuf[64*block] = sample << 8;
 						sample += delta_lut[data[block][1] & 0xf];
 						outbuf[64*block+1] = sample << 8;
-						for (unsigned int j = 1; j < 32; ++j)
+						for (uint32_t j = 1; j < 32; ++j)
 						{
 							uint8_t d = data[block][j+1];
 							sample += delta_lut[d >> 4];
@@ -444,12 +444,12 @@ public:
 
 			// If loop enabled, write 8 samples after loop point
 			// (required by the dumb SF2 standard)
-			if(loop_flag_list[i])
+			if (loop_flag_list[i])
 				fwrite(outbuf + loop_pos_list[i], 2, 8, sf2->out);
 
 			// Write 46 dummy zeroed samples at the end
 			// which is also required by the very dumb SF2 standard
-			for(int j = 0; j < 2*46; j++)
+			for(int32_t j = 0; j < 2*46; j++)
 				putc(0x00, sf2->out);
 
 			delete[] outbuf;
@@ -478,7 +478,7 @@ public:
 		SF2Chunks::write();
 
 		// Call the write function for all elements of the list
-		for(unsigned int i=0; i<preset_list.size(); i++)
+		for(uint32_t i=0; i<preset_list.size(); i++)
 			preset_list[i].write();
 	}
 };
@@ -503,7 +503,7 @@ public:
 	{
 		SF2Chunks::write();
 
-		for(unsigned int i=0; i<instrument_list.size(); i++)
+		for(uint32_t i=0; i<instrument_list.size(); i++)
 			instrument_list[i].write();
 	}
 };
@@ -532,7 +532,7 @@ public:
 		SF2Chunks::write();
 
 		// Call the write function for all elements of the list
-		for(unsigned int i=0; i<bag_list.size(); i++)
+		for(uint32_t i=0; i<bag_list.size(); i++)
 			bag_list[i].write();
 	}
 };
@@ -548,7 +548,7 @@ public:
 	MODSubChunk (SF2 *sf2, bool preset) :
 		SF2Chunks(sf2, preset ? "pmod" : "imod")
 	{
-		// if(preset)
+		// if (preset)
 			// name = "pmod";
 		// else
 			// name = "imod";
@@ -565,7 +565,7 @@ public:
 	{
 		SF2Chunks::write();
 
-		for(unsigned int i=0; i<modulator_list.size(); i++)
+		for(uint32_t i=0; i<modulator_list.size(); i++)
 			modulator_list[i].write();
 	}
 };
@@ -581,7 +581,7 @@ public:
 	GENSubChunk (SF2 *sf2, bool preset) :
 		SF2Chunks(sf2, preset ? "pgen" : "igen")
 	{
-		// if(preset)
+		// if (preset)
 			// name = "pgen";
 		// else
 			// name = "igen";
@@ -598,7 +598,7 @@ public:
 	{
 		SF2Chunks::write();
 
-		for(unsigned int i=0; i<generator_list.size(); i++)
+		for(uint32_t i=0; i<generator_list.size(); i++)
 			generator_list[i].write();
 	}
 };
@@ -623,7 +623,7 @@ public:
 	{
 		SF2Chunks::write();
 
-		for(unsigned int i=0; i<sample_list.size(); i++)
+		for(uint32_t i=0; i<sample_list.size(); i++)
 			sample_list[i].write();
 	}
 };
@@ -722,7 +722,7 @@ class HydraChunk : public SF2Chunks
 	GENSubChunk igen_subchunk;
 	SHDRSubChunk shdr_subchunk;
 
-	friend void SF2::add_new_preset(const char *name, int patch, int bank);
+	friend void SF2::add_new_preset(const char *name, int32_t patch, int32_t bank);
 	friend void SF2::add_new_instrument(const char *name);
 	friend void SF2::add_new_inst_bag();
 	friend void SF2::add_new_preset_bag();
@@ -734,7 +734,7 @@ class HydraChunk : public SF2Chunks
 	friend void SF2::add_new_inst_generator();
 	friend void SF2::add_new_inst_generator(SFGenerator operation, uint16_t value);
 	friend void SF2::add_new_inst_generator(SFGenerator operation, uint8_t lo, uint8_t hi);
-	friend void SF2::add_new_sample_header(const char *name, int start, int end, int start_loop, int end_loop, int sample_rate, int original_pitch, int pitch_correction);
+	friend void SF2::add_new_sample_header(const char *name, int32_t start, int32_t end, int32_t start_loop, int32_t end_loop, int32_t sample_rate, int32_t original_pitch, int32_t pitch_correction);
 
 	friend uint16_t SF2::get_ibag_size();
 	friend uint16_t SF2::get_imod_size();

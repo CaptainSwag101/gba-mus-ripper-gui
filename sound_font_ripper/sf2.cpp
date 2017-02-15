@@ -23,14 +23,14 @@
  * - Output to the target file
  */
 
-#include <stdio.h>
-#include <string.h>
+#include <cstdio>
+#include <cstring>
 #include "sf2.h"
 #include "sf2_chunks.h"
 #include "gba_samples.h"
 
 //Constructor to change the default sample rate
-SF2::SF2(unsigned int sample_rate = 22050) :
+SF2::SF2(uint32_t sample_rate = 22050) :
 	size(0), /*instruments(this),*/
 	infolist_chunk(new InfoListChunk(this)),
 	sdtalist_chunk(new SdtaListChunk(this)),
@@ -90,7 +90,7 @@ void SF2::add_terminals()
 }
 
 //Add a brand new preset header to the list
-void SF2::add_new_preset(const char *name, int patch, int bank)
+void SF2::add_new_preset(const char *name, int32_t patch, int32_t bank)
 {
 	pdtalist_chunk->phdr_subchunk.add_preset(sfPresetHeader(this, name, patch, bank));
 }
@@ -164,7 +164,7 @@ void SF2::add_new_inst_generator(SFGenerator operation, uint8_t lo, uint8_t hi)
 }
 
 //Add a brand new header
-void SF2::add_new_sample_header(const char *name, int start, int end, int start_loop, int end_loop, int sample_rate, int original_pitch, int pitch_correction)
+void SF2::add_new_sample_header(const char *name, int32_t start, int32_t end, int32_t start_loop, int32_t end_loop, int32_t sample_rate, int32_t original_pitch, int32_t pitch_correction)
 {
 	pdtalist_chunk->shdr_subchunk.add_sample(sfSample(this, name, start, end, start_loop, end_loop, sample_rate, original_pitch, pitch_correction));
 }

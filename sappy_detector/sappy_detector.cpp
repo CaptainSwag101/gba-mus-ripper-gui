@@ -48,7 +48,7 @@ static uint8_t m4a_bin_main[M4A_MAIN_PATT_COUNT][M4A_MAIN_LEN] =
 // byte reader/writer (little-endian)
 static inline uint32_t read_u32 (uint8_t *data) { return data[0] + (data[1] << 8) + (data[2] << 16) + (data[3] << 24); }
 
-static long memsearch(uint8_t *dst, size_t dstsize, uint8_t *src, size_t srcsize, size_t dst_offset, size_t alignment, int diff_threshold)
+static long memsearch(uint8_t *dst, size_t dstsize, uint8_t *src, size_t srcsize, size_t dst_offset, size_t alignment, int32_t diff_threshold)
 {
 	if (alignment == 0)
 	{
@@ -64,7 +64,7 @@ static long memsearch(uint8_t *dst, size_t dstsize, uint8_t *src, size_t srcsize
 	for (size_t offset = dst_offset; (offset + srcsize) <= dstsize; offset += alignment)
 	{
 		// memcmp(&dst[offset], src, srcsize)
-		int diff = 0;
+        int32_t diff = 0;
 		for (size_t i = 0; i < srcsize; i++)
 		{
 			if (dst[offset + i] != src[i])
@@ -142,8 +142,8 @@ static long m4a_searchblock(uint8_t *gbarom, size_t gbasize)
 			}
 
 			// song table must have more than one song
-			int validsongcount = 0;
-			for (int songindex = 0; validsongcount < 1; songindex++)
+            int32_t validsongcount = 0;
+            for (int32_t songindex = 0; validsongcount < 1; songindex++)
 			{
 				uint32_t songaddroffset = m4a_songtable_offset_tmp + (songindex * 8);
 				if (!is_valid_offset(songaddroffset + 4 - 1, gbasize))
@@ -197,7 +197,7 @@ static long m4a_searchblock(uint8_t *gbarom, size_t gbasize)
 	}
 	while (m4a_main_offset_tmp > 0 && m4a_main_offset_tmp > ((uint32_t) m4a_selectsong_offset - 0x20))
 	{
-		for (int mainpattern = 0; mainpattern < M4A_MAIN_PATT_COUNT; mainpattern++)
+        for (int32_t mainpattern = 0; mainpattern < M4A_MAIN_PATT_COUNT; mainpattern++)
 		{
 			if (memcmp(&gbarom[m4a_main_offset_tmp], &m4a_bin_main[mainpattern][0], M4A_INIT_LEN) == 0)
 			{
@@ -212,10 +212,10 @@ static long m4a_searchblock(uint8_t *gbarom, size_t gbasize)
 
 typedef struct
 {
-	unsigned int polyphony           : 4;
-	unsigned int main_vol            : 4;
-	unsigned int sampling_rate_index : 4;
-	unsigned int dac_bits            : 4;
+    uint32_t polyphony           : 4;
+    uint32_t main_vol            : 4;
+    uint32_t sampling_rate_index : 4;
+    uint32_t dac_bits            : 4;
 }
 sound_engine_param_t;
 
@@ -249,13 +249,13 @@ static bool test_pointer_validity(uint32_t *data, uint32_t inGBA_length)
 	     &&((data[0] & 0xff000000) == 0);
 }
 
-int sappy_detector(const int argc, string argv)
+int32_t sappy_detector(const int32_t argc, string argv)
 {
-    if(argc != 1) print_instructions();
+    if (argc != 1) print_instructions();
     puts("GBA Sappy Engine Detector (c) 2015 by Bregalad and loveemu\n");
 
     FILE *inGBA = fopen(argv.c_str(), "rb");
-	if(!inGBA)
+    if (!inGBA)
 	{
         fprintf(stderr, "Error: File %s can't be opened for reading.\n", argv.c_str());
         return -1;
@@ -266,15 +266,15 @@ int sappy_detector(const int argc, string argv)
 	const size_t inGBA_length = ftell(inGBA);
 
 	uint8_t *inGBA_dump = (uint8_t*)malloc(inGBA_length);
-	if(!inGBA_dump)
+    if (!inGBA_dump)
 	{
         fprintf(stderr, "Error: can't allocate memory for ROM dump.\n");
         return -2;
 	}
 
 	fseek(inGBA, 0L, SEEK_SET);
-    size_t errcode = fread(inGBA_dump, 1, inGBA_length, inGBA);
-	if(errcode != inGBA_length)
+    uint32_t errcode = fread(inGBA_dump, 1, inGBA_length, inGBA);
+    if (errcode != inGBA_length)
 	{
         fprintf(stderr, "Error: can't dump ROM file. %x\n", errcode);
         return -3;
@@ -283,7 +283,7 @@ int sappy_detector(const int argc, string argv)
 
 	int32_t offset = m4a_searchblock(inGBA_dump, inGBA_length);
 	
-	if(offset < 0)
+    if (offset < 0)
 	{
 		/* If no address were told manually and nothing was detected.... */
 		puts("No sound engine was found.");
@@ -296,7 +296,7 @@ int sappy_detector(const int argc, string argv)
 	bool valid_m32 = test_pointer_validity((uint32_t*)(inGBA_dump + offset - 32), inGBA_length);	// For pokémon
 
 	/* If neither is found there is an error */
-	if(!valid_m16 && !valid_m32)
+    if (!valid_m16 && !valid_m32)
 	{
 		puts("Only a partial sound engine was found.");
         return -5;

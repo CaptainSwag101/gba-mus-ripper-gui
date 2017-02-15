@@ -22,13 +22,13 @@ public:
 	{}
 
 	// Convert a normal sample to SoundFont format
-	int build_sample(uint32_t pointer);
+	int32_t build_sample(uint32_t pointer);
 	// Convert a Game Boy channel 3 sample to SoundFont format
-	int build_GB3_samples(uint32_t pointer);
+	int32_t build_GB3_samples(uint32_t pointer);
 	// Convert a Game Boy pulse (channels 1, 2) sample
-	int build_pulse_samples(unsigned int duty_cycle);
+	int32_t build_pulse_samples(uint32_t duty_cycle);
 	// Convert a Game Boy noise (channel 4) sample
-	int build_noise_sample(bool metallic, int key);
+	int32_t build_noise_sample(bool metallic, int32_t key);
 };
 
 #endif

@@ -6,11 +6,11 @@
  * Nintendo's "sappy" engine (which ~90% of commercial GBA games are using),
  * and converts it to the widely used SF2 Sound Font format.
  */
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdint.h>
-#include <math.h>
-#include <string.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstdint>
+#include <cmath>
+#include <cstring>
 #include "sf2.h"
 #include "gba_instr.h"
 #include "../hex_string.h"
@@ -29,12 +29,12 @@ static bool verbose_output_to_file = false;
 static bool change_sample_rate = false;
 static bool gm_preset_names = false;
 
-static unsigned int sample_rate = 22050;
+static uint32_t sample_rate = 22050;
 static std::set<uint32_t> addresses;
-static unsigned int current_address;
-static unsigned int current_bank;
-static unsigned int current_instrument;
-static unsigned int main_volume = 15;
+static uint32_t current_address;
+static uint32_t current_bank;
+static uint32_t current_instrument;
+static uint32_t main_volume = 15;
 
 static SF2 *sf2;
 static GBAInstr *instruments;
@@ -83,7 +83,7 @@ static const char *const general_MIDI_instr_names[128] =
 // Add initial attenuation preset to balance between GameBoy and sampled instruments
 static void add_attenuation_preset()
 {
-	if(main_volume < 15)
+	if (main_volume < 15)
 	{
 		const uint16_t attenuation = uint16_t(100.0 * log(15.0/main_volume));
 		sf2->add_new_preset_generator(SFGenerator::initialAttenuation, attenuation);
@@ -96,7 +96,7 @@ static void build_instrument(const inst_data inst)
 {
 	uint8_t instr_type = inst.word0 & 0xff;
 	std::string name;
-	if(gm_preset_names)
+	if (gm_preset_names)
 		name = std::string(general_MIDI_instr_names[current_instrument]);
 	else
 		// (poetic) name of the SF2 preset...
@@ -115,7 +115,7 @@ static void build_instrument(const inst_data inst)
 			case 0x30:
 			case 0x38:
 			{
-				int i = instruments->build_sampled_instrument(inst);
+				int32_t i = instruments->build_sampled_instrument(inst);
 				sf2->add_new_preset(name.c_str(), current_instrument, current_bank);
 				sf2->add_new_preset_bag();
 				// Add initial attenuation preset to balance volume between sampled and GB instruments
@@ -130,9 +130,9 @@ static void build_instrument(const inst_data inst)
 			case 0x0a:
 			{
 				// Can only convert them if the psg_data file is found
-				if(psg_data)
+				if (psg_data)
 				{
-					int i = instruments->build_pulse_instrument(inst);
+					int32_t i = instruments->build_pulse_instrument(inst);
 					sf2->add_new_preset(name.c_str(), current_instrument, current_bank);
 					sf2->add_new_preset_bag();
 					sf2->add_new_preset_generator(SFGenerator::instrument, i);
@@ -143,7 +143,7 @@ static void build_instrument(const inst_data inst)
 			case 0x03:
 			case 0x0b:
 			{
-				int i = instruments->build_GB3_instrument(inst);
+				int32_t i = instruments->build_GB3_instrument(inst);
 				sf2->add_new_preset(name.c_str(), current_instrument, current_bank);
 				sf2->add_new_preset_bag();
 				sf2->add_new_preset_generator(SFGenerator::instrument, i);
@@ -153,9 +153,9 @@ static void build_instrument(const inst_data inst)
 			case 0x04:
 			case 0x0c:
 			{
-				if(psg_data)
+				if (psg_data)
 				{
-					int i = instruments->build_noise_instrument(inst);
+					int32_t i = instruments->build_noise_instrument(inst);
 					sf2->add_new_preset(name.c_str(), current_instrument, current_bank);
 					sf2->add_new_preset_bag();
 					sf2->add_new_preset_generator(SFGenerator::instrument, i);
@@ -165,7 +165,7 @@ static void build_instrument(const inst_data inst)
 			// Key split instrument
 			case 0x40:
 			{
-				int i = instruments->build_keysplit_instrument(inst);
+				int32_t i = instruments->build_keysplit_instrument(inst);
 				sf2->add_new_preset(name.c_str(), current_instrument, current_bank);
 				sf2->add_new_preset_bag();
 				// Add initial attenuation preset to balance volume between sampled and GB instruments
@@ -176,7 +176,7 @@ static void build_instrument(const inst_data inst)
 			// Every key split instrument
 			case 0x80:
 			{
-				int i = instruments->build_every_keysplit_instrument(inst);
+				int32_t i = instruments->build_every_keysplit_instrument(inst);
 				sf2->add_new_preset(name.c_str(), current_instrument, current_bank);
 				sf2->add_new_preset_bag();
 				// Add initial attenuation preset to balance volume between sampled and GB instruments
@@ -199,29 +199,29 @@ static void build_instrument(const inst_data inst)
 // Display verbose to console or output to file if requested
 static void print(const std::string& s)
 {
-	if(verbose_flag)
+	if (verbose_flag)
 		fprintf(out_txt, s.c_str());
 }
 
 static void print(const char* s)
 {
-	if(verbose_flag)
+	if (verbose_flag)
 		fprintf(out_txt, s);
 }
 
 // Display ADSR values used
 static void adsr(uint32_t adsr)
 {
-	int attack = adsr & 0xFF;
-	int decay = (adsr>>8) & 0xFF;
-	int sustain = (adsr>>16) & 0xFF;
-	int release = adsr>>24;
+	int32_t attack = adsr & 0xFF;
+	int32_t decay = (adsr>>8) & 0xFF;
+	int32_t sustain = (adsr>>16) & 0xFF;
+	int32_t release = adsr>>24;
 	// Print ADSR values
 	fprintf(out_txt, "      ADSR : %d, %d, %d, %d\n", attack, decay, sustain, release);
 }
 
 // Display duty cycle used
-static void duty_cycle(int duty)
+static void duty_cycle(int32_t duty)
 {
 	const char *const cycles[4] = {"12.5%", "25%", "50%", "75%"};
 	fprintf(out_txt, "      Duty cycle : %s\n", cycles[duty&3]);
@@ -232,7 +232,7 @@ static void duty_cycle(int duty)
 static void verbose_instrument(const inst_data inst, bool recursive)
 {
 	// Do nothing with unused instruments
-	if(inst.word0 == 0x3c01 && inst.word1 == 0x02 && inst.word2 == 0x0F0000) return;
+	if (inst.word0 == 0x3c01 && inst.word1 == 0x02 && inst.word2 == 0x0F0000) return;
 
 	uint8_t instr_type = inst.word0 & 0xff;
 	fprintf(out_txt, "  Type : 0x%x  ", instr_type);
@@ -253,7 +253,7 @@ static void verbose_instrument(const inst_data inst, bool recursive)
 
 			try
 			{
-				if(fseek(inGBA, sadr, SEEK_SET)) throw -1;
+				if (fseek(inGBA, sadr, SEEK_SET)) throw -1;
 				struct
 				{
 					uint32_t loop;
@@ -267,11 +267,11 @@ static void verbose_instrument(const inst_data inst, bool recursive)
 				fprintf(out_txt, "      Pitch : %u\n", ins.pitch/1024);
 				fprintf(out_txt, "      Length : %u\n", ins.len);
 
-				if(ins.loop == 0)
+				if (ins.loop == 0)
 					fputs("      Not looped\n", out_txt);
-				else if(ins.loop == 0x40000000)
+				else if (ins.loop == 0x40000000)
 					fprintf(out_txt, "      Loop enabled at : %u\n", ins.loop_pos);
-				else if(ins.loop == 0x1)
+				else if (ins.loop == 0x1)
 					fputs("      BDPCM compressed\n", out_txt);
 				else
 					fputs("      Unknown loop type\n", out_txt);
@@ -289,7 +289,7 @@ static void verbose_instrument(const inst_data inst, bool recursive)
 		case 9 :
 		{
 			fputs("(GB pulse channel 1)", out_txt);
-			if((char)inst.word0 != 8)			// Display sweep if enabled on GB channel 1
+			if ((char)inst.word0 != 8)			// Display sweep if enabled on GB channel 1
 				fprintf(out_txt, "      Sweep : 0x%x\n", inst.word0 & 0xFF);
 
 			adsr(inst.word2);
@@ -317,10 +317,10 @@ static void verbose_instrument(const inst_data inst, bool recursive)
 			try
 			{
 				// Seek to waveform's location
-				if(fseek(inGBA, inst.word1&0x3ffffff, SEEK_SET)) throw -1;
-				int waveform[32];
+				if (fseek(inGBA, inst.word1&0x3ffffff, SEEK_SET)) throw -1;
+				int32_t waveform[32];
 
-				for(int j=0; j<16; j++)
+				for(int32_t j=0; j<16; j++)
 				{
 					uint8_t a = fgetc(inGBA);
 					waveform[2*j] = a>>4;
@@ -328,13 +328,13 @@ static void verbose_instrument(const inst_data inst, bool recursive)
 				}
 
 				// Display waveform in text format
-				for(int j=7; j>=0; j--)
+				for(int32_t j=7; j>=0; j--)
 				{
-					for(int k=0; k!=32; k++)
+					for(int32_t k=0; k!=32; k++)
 					{
-						if(waveform[k] == 2*j)
+						if (waveform[k] == 2*j)
 							fputc('_', out_txt);
-						else if(waveform[k] == 2*j+1)
+						else if (waveform[k] == 2*j+1)
 							fputc('-', out_txt);
 						else
 							fputc(' ', out_txt);
@@ -353,7 +353,7 @@ static void verbose_instrument(const inst_data inst, bool recursive)
 		case 12 :
 			fputs("(GB noise channel 4)", out_txt);
 			adsr(inst.word2);
-			if(inst.word1  == 0)
+			if (inst.word1  == 0)
 				fputs("      long random sequence\n", out_txt);
 			else
 				fputs("      short random sequence\n", out_txt);
@@ -363,32 +363,32 @@ static void verbose_instrument(const inst_data inst, bool recursive)
 		case 0x40 :
 			fputs("Key-split instrument", out_txt);
 
-			if(!recursive)
+			if (!recursive)
 			{
 				bool *keys_used = new bool[128]();
 				try
 				{
 				// seek to key table's location
-					if(fseek(inGBA, inst.word2&0x3ffffff, SEEK_SET)) throw -1;
+					if (fseek(inGBA, inst.word2&0x3ffffff, SEEK_SET)) throw -1;
 
-					for(int k = 0; k!= 128; k++)
+					for(int32_t k = 0; k!= 128; k++)
 					{
 						uint8_t c = fgetc(inGBA);
-						if(c & 0x80) continue;		// Ignore entries with MSB set (invalid)
+						if (c & 0x80) continue;		// Ignore entries with MSB set (invalid)
 						keys_used[c] = true;
 					}
 
-					int instr_table = inst.word1 & 0x3ffffff;
+					int32_t instr_table = inst.word1 & 0x3ffffff;
 
-					for(int k = 0; k!= 128; k++)
+					for(int32_t k = 0; k!= 128; k++)
 					{
 						// Decode instruments used at least once in the key table
-						if(keys_used[k])
+						if (keys_used[k])
 						{
 							try
 							{
 								// Seek to the addressed instrument
-								if(fseek(inGBA, instr_table + 12*k, SEEK_SET)) throw -1;
+								if (fseek(inGBA, instr_table + 12*k, SEEK_SET)) throw -1;
 								inst_data sub_instr;
 								// Read the addressed instrument
 								fread(&sub_instr, 4, 3, inGBA);
@@ -415,14 +415,14 @@ static void verbose_instrument(const inst_data inst, bool recursive)
 		case 0x80 :
 			fputs("Every key split instrument", out_txt);
 
-			if(!recursive)
+			if (!recursive)
 			{
 				uint32_t address = inst.word1 & 0x3ffffff;
-				for(int k = 0; k<128; ++k)
+				for(int32_t k = 0; k<128; ++k)
 				{
 					try
 					{
-						if(fseek(inGBA, address + k*12, SEEK_SET)) throw -1;
+						if (fseek(inGBA, address + k*12, SEEK_SET)) throw -1;
 						inst_data key_instr;
 						fread(&key_instr, 4, 3, inGBA);
 						
@@ -443,31 +443,31 @@ static void verbose_instrument(const inst_data inst, bool recursive)
 			fputs("Unknown instrument type", out_txt);
 			return;
 	}
-	if(recursive)
+	if (recursive)
 		fprintf(out_txt, "      Key : %d, Pan : %d\n", (inst.word1>>8) & 0xFF, inst.word1>>24);
 }
 
-static void parse_arguments(const int argc, char *const argv[])
+static void parse_arguments(const int32_t argc, char *const argv[])
 {
 	if (argc == 0) print_instructions();
 	bool infile_found = false;
 	bool outfile_found = false;
 
-	for(int i = 0; i<argc; i++)
+	for(int32_t i = 0; i<argc; i++)
 	{
 		// Enable verbose if -v flag encountered in arguments list
-		if(argv[i][0] == '-')
+		if (argv[i][0] == '-')
 		{
-			if(!strcmp(argv[i], "-v"))
+			if (!strcmp(argv[i], "-v"))
 			{
 				verbose_flag = true;
 
 				// Verbose to file if a file name is given
-				if(i < argc-1 && argv[i+1][0] != '-')
+				if (i < argc-1 && argv[i+1][0] != '-')
 				{
 					verbose_output_to_file = true;
 					out_txt = fopen(argv[i]+2, "w");
-					if(!out_txt)
+					if (!out_txt)
 					{
 						fprintf(stderr, "Invalid output text verbose file : %s\n", argv[i]+2);
 						exit(-1);
@@ -476,11 +476,11 @@ static void parse_arguments(const int argc, char *const argv[])
 			}
 
 			// Change sampling rate if -s is encountered
-			else if(argv[i][1] == 's')
+			else if (argv[i][1] == 's')
 			{
 				change_sample_rate = true;
 				sample_rate = atoi(argv[i]+2);
-				if(!sample_rate)
+				if (!sample_rate)
 				{
 					fprintf(stderr, "Error, sampling rate %s is not a valid number.\n", argv[i]+2);
 					exit(-1);
@@ -488,81 +488,81 @@ static void parse_arguments(const int argc, char *const argv[])
 			}
 			
 			// Change main volume if -mv is encountered
-			else if(argv[i][1] == 'm' && argv[i][2] == 'v')
+			else if (argv[i][1] == 'm' && argv[i][2] == 'v')
 			{
-				unsigned int volume = strtoul(argv[i]+3, 0, 10);
-				if(volume==0 || volume>15)
+				uint32_t volume = strtoul(argv[i]+3, 0, 10);
+				if (volume==0 || volume>15)
 				{
 					fprintf(stderr, "Error, main volume %u is not valid (should be 0-15).\n", volume);
 					exit(-1);
 				}
 				main_volume = volume;
 			}
-			else if(!strcmp(argv[i], "-gm"))
+			else if (!strcmp(argv[i], "-gm"))
 				gm_preset_names = true;
 			
-			else if(!strcmp(argv[i], "-help"))
+			else if (!strcmp(argv[i], "-help"))
 				print_instructions();
 		}
 
 		// Try to parse an address and add it to list if succes
-		else if(!infile_found)
+		else if (!infile_found)
 		{
 			// Input File
 			infile_found = true;
 			inGBA = fopen(argv[i], "rb");
-			if(!inGBA)
+			if (!inGBA)
 			{
 				fprintf(stderr, "Can't read input GBA file : %s\n", argv[0]);
 				exit(-1);
 			}
 		}
-		else if(!outfile_found)
+		else if (!outfile_found)
 		{
 			outfile_found = true;
 			size_t l = strlen(argv[i]);
 			char *buffer = argv[i];
-			if(l <= 4 || strcmp(argv[i] + (l-4), ".sf2"))
+			if (l <= 4 || strcmp(argv[i] + (l-4), ".sf2"))
 			{	// Append ".sf2" after the given file name if there isn't it already
 				buffer = new char[l+4];
 				strcpy(buffer, argv[i]);
 				strcpy(buffer + l, ".sf2");
 			}
 			outSF2 = fopen(buffer, "wb");
-			if(!outSF2)
+			if (!outSF2)
 			{
 				fprintf(stderr, "Can't write on file : %s\n", argv[i]);
 				exit(-1);
 			}
-			if(buffer != argv[i])
+			if (buffer != argv[i])
 				delete[] buffer;
 		}
 		else
 		{
 			uint32_t address = strtoul(argv[i], 0, 0);
-			if(!address) print_instructions();
+			if (!address) print_instructions();
 			addresses.insert(address);				
 		}
 	}
 	// Diagnostize errors/missing information
-	if(!infile_found)
+	if (!infile_found)
 	{
 		fputs("An input .gba file should be given. Use -help for more information.\n", stderr);
 		exit(-1);
 	}
-	if(!outfile_found)
+	if (!outfile_found)
 	{
 		fputs("An output .sf2 file should be given. Use -help for more information.\n", stderr);
 		exit(-1);
 	}
-	if(addresses.empty())
+	if (addresses.empty())
 	{
 		fputs("At least one adress should be given for decoding. Use -help for more information.\n", stderr);
 		exit(-1);
 	}
 }
 
-int sound_font_ripper(int argc, char *argv[])
+int32_t sound_font_ripper(int32_t argc, char *argv[])
 {
 	puts("GBA ROM sound font ripper (c) 2012 Bregalad");
 
@@ -579,12 +579,12 @@ int sound_font_ripper(int argc, char *argv[])
 
 	// Attempt to access psg_data file
 	psg_data = fopen((prg_prefix + "psg_data.raw").c_str(), "rb");
-	if(!psg_data)
+	if (!psg_data)
 		puts("psg_data.raw file not found ! PSG Instruments can't be dumped.");
 
 	// Attempt to access goldensun_synth file
 	goldensun_synth = fopen((prg_prefix + "goldensun_synth.raw").c_str(), "rb");
-	if(!goldensun_synth)
+	if (!goldensun_synth)
 		puts("goldensun_synth.raw file not found ! Golden Sun's synth instruments can't be dumped.");
 
 	// Read instrument data from input GBA file
@@ -600,12 +600,12 @@ int sound_font_ripper(int argc, char *argv[])
 		uint32_t next_address = *next_it;
 
 		// Limit the # of presets if the addresses overlaps
-		unsigned int ninstr = 128;
-		if(addresses.end() != next_it && (next_address - current_address)/12 < 128)
+		uint32_t ninstr = 128;
+		if (addresses.end() != next_it && (next_address - current_address)/12 < 128)
 			ninstr = (next_address - current_address)/12;
 
 		// Seek at the start of the sound bank
-		if(fseek(inGBA, current_address, SEEK_SET) != 0
+		if (fseek(inGBA, current_address, SEEK_SET) != 0
 		|| fread(instr_data, 4, ninstr*3, inGBA) != ninstr*3)				// Read entire sound bank in memory
 		{
 			fprintf(stderr, "Error : Invalid position within input GBA file : 0x%x\n", current_address);
@@ -618,7 +618,7 @@ int sound_font_ripper(int argc, char *argv[])
 			print("\nBank : " + std::to_string(current_bank) + ", Instrument : " + std::to_string(current_instrument) + " @0x" + hex(current_address));
 
 			// Ignore unused instruments
-			if(instr_data[current_instrument].word0 == 0x3c01
+			if (instr_data[current_instrument].word0 == 0x3c01
 			&& instr_data[current_instrument].word1 == 0x02
 			&& instr_data[current_instrument].word2 == 0x0F0000)
 			{
@@ -626,7 +626,7 @@ int sound_font_ripper(int argc, char *argv[])
 				continue;
 			}
 
-			if(verbose_flag)
+			if (verbose_flag)
 				verbose_instrument(instr_data[current_instrument], false);
 
 			// Build equivalent SF2 instrument
@@ -635,7 +635,7 @@ int sound_font_ripper(int argc, char *argv[])
 	}
 	delete[] instr_data;
 
-	if(verbose_output_to_file)
+	if (verbose_output_to_file)
 	{
 		print("\n\n EOF");
 		fclose(out_txt);
@@ -650,8 +650,8 @@ int sound_font_ripper(int argc, char *argv[])
 	// Close files
 	fclose(inGBA);
 
-	if(psg_data) fclose(psg_data);
-	if(goldensun_synth) fclose(goldensun_synth);
+	if (psg_data) fclose(psg_data);
+	if (goldensun_synth) fclose(goldensun_synth);
 
 	puts(" Done !");
 	return 0;

@@ -1,8 +1,8 @@
 #ifndef SF2_HPP
 #define SF2_HPP
 
-#include <stdio.h>
-#include <stdint.h>
+#include <cstdio>
+#include <cstdint>
 #include "sf2_types.h"
 
 class InfoListChunk;
@@ -44,12 +44,12 @@ class SF2
 public:
 	//Target file, should be assigned to a valid opened FILE in "wb" mode by user before "write()" is called.
 	FILE *out;
-	unsigned int default_sample_rate;
+	uint32_t default_sample_rate;
 
-	SF2(unsigned int sample_rate);
+	SF2(uint32_t sample_rate);
 	~SF2();
 	void write(FILE *outfile);
-	void add_new_preset(const char *name, int Patch, int Bank);
+	void add_new_preset(const char *name, int32_t Patch, int32_t Bank);
 	void add_new_instrument(const char *name);
 	void add_new_inst_bag();
 	void add_new_preset_bag();
@@ -61,7 +61,7 @@ public:
 	void add_new_inst_generator();
 	void add_new_inst_generator(SFGenerator operation, uint16_t value);
 	void add_new_inst_generator(SFGenerator operation, uint8_t lo, uint8_t hi);
-	void add_new_sample_header(const char *name, int start, int end, int start_loop, int end_loop, int sample_rate, int original_pitch, int pitch_correction);
+	void add_new_sample_header(const char *name, int32_t start, int32_t end, int32_t start_loop, int32_t end_loop, int32_t sample_rate, int32_t original_pitch, int32_t pitch_correction);
 
 	void add_new_sample(FILE *file, SampleType type, const char *name, uint32_t pointer, uint32_t size, bool loop_flag,
 				  uint32_t loop_pos, uint32_t original_pitch, uint32_t pitch_correction, uint32_t sample_rate);

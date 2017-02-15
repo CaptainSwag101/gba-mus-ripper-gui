@@ -9,9 +9,9 @@
 #include <iostream>
 #include <algorithm>
 #include <forward_list>
-#include <math.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cmath>
+#include <cstdlib>
+#include <cstring>
 
 using namespace std;
 
@@ -22,28 +22,28 @@ static uint32_t track_ptr[16];
 static uint8_t last_cmd[16];
 static char last_key[16];
 static char last_vel[16];
-static int counter[16];
+static int32_t counter[16];
 static uint32_t return_ptr[16];
-static int key_shift[16];
+static int32_t key_shift[16];
 static bool return_flag[16];
 static bool track_completed[16];
 static bool end_flag = false;
 static bool loop_flag = false;
 static uint32_t loop_adr;
 
-static int lfo_delay_ctr[16];
-static int lfo_delay[16];
-static int lfo_depth[16];
-static int lfo_type[16];
+static int32_t lfo_delay_ctr[16];
+static int32_t lfo_delay[16];
+static int32_t lfo_depth[16];
+static int32_t lfo_type[16];
 static bool lfo_flag[16];
 static bool lfo_hack[16];
 
-static unsigned int simultaneous_notes_ctr = 0;
-static unsigned int simultaneous_notes_max = 0;
+static uint32_t simultaneous_notes_ctr = 0;
+static uint32_t simultaneous_notes_max = 0;
 
 static forward_list<Note> notes_playing;
 
-static int bank_number;
+static int32_t bank_number;
 static bool bank_used = false;
 static bool rc = false;
 static bool gs = false;
@@ -54,7 +54,7 @@ static bool sv = false;
 static MIDI midi(24);
 static FILE *inGBA;
 
-static void process_event(int track);
+static void process_event(int32_t track);
 
 static void print_instructions()
 {
@@ -81,20 +81,20 @@ static void print_instructions()
 static void add_simultaneous_note()
 {
     // Update simultaneous notes max.
-    if(++simultaneous_notes_ctr > simultaneous_notes_max)
+    if (++simultaneous_notes_ctr > simultaneous_notes_max)
         simultaneous_notes_max = simultaneous_notes_ctr;
 }
 
 // LFO logic on tick
-static void process_lfo(int track)
+static void process_lfo(int32_t track)
 {
-    if(sv && lfo_delay_ctr[track] != 0)
+    if (sv && lfo_delay_ctr[track] != 0)
     {
         // Decrease counter if it's value was nonzero
-        if(--lfo_delay_ctr[track] == 0)
+        if (--lfo_delay_ctr[track] == 0)
         {
             // If 1->0 transition we need to add a signal to start the LFO
-            if(lfo_type[track] == 0)
+            if (lfo_type[track] == 0)
                 // Send a controller 1 if pitch LFO
                 midi.add_controller(track, 1, (lfo_depth[track] < 16) ? lfo_depth[track] * 8 : 127);
             else
@@ -105,26 +105,29 @@ static void process_lfo(int track)
     }
 }
 
-static void start_lfo(int track)
+static void start_lfo(int32_t track)
 {
     // Reset down delay counter to its initial value
-    if(sv && lfo_delay[track] != 0)
+    if (sv && lfo_delay[track] != 0)
         lfo_delay_ctr[track] = lfo_delay[track];
 }
 
-static void stop_lfo(int track)
+static void stop_lfo(int32_t track)
 {
     // Cancel a LFO if it was playing,
-    if(sv && lfo_flag[track])
+    if (sv && lfo_flag[track])
     {
-        if(lfo_type[track]==0)
+        if (lfo_type[track]==0)
             midi.add_controller(track, 1, 0);
         else
             midi.add_chanaft(track, 0);
         lfo_flag[track] = false;
     }
     else
-        lfo_delay_ctr[track] = 0;			// cancel delay counter if it wasn't playing
+    {
+        // Cancel delay counter if it wasn't playing
+        lfo_delay_ctr[track] = 0;
+    }
 }
 
 // Note class
@@ -133,10 +136,10 @@ static void stop_lfo(int track)
 class Note
 {
     MIDI& midi;
-    int counter;
-    int key;
-    int vel;
-    int chn;
+    int32_t counter;
+    int32_t key;
+    int32_t vel;
+    int32_t chn;
     bool event_made;
 
     // Tick counter, if it becomes zero
@@ -144,7 +147,7 @@ class Note
     // this function returns "true" when the note should be freed from memory
     bool tick()
     {
-        if(counter > 0 && --counter == 0)
+        if (counter > 0 && --counter == 0)
         {
             midi.add_note_off(chn, key, vel);
             stop_lfo(chn);
@@ -159,7 +162,7 @@ class Note
 
 public:
     // Create note and key on event
-    Note(MIDI& midi, int chn, int len, int key, int vel) :
+    Note(MIDI& midi, int32_t chn, int32_t len, int32_t key, int32_t vel) :
         midi(midi), counter(len), key(key), vel(vel), chn(chn)
     {
         event_made = false;
@@ -176,21 +179,21 @@ bool countdown_is_over(Note& n)
 
 void make_note_on_event(Note& n)
 {
-    if(!n.event_made)
+    if (!n.event_made)
     {
         midi.add_note_on(n.chn, n.key, n.vel);
         n.event_made = true;
     }
 }
 
-static bool tick(int track_amnt)
+static bool tick(int32_t track_amnt)
 {
     // Tick all playing notes, and remove notes which
     // have been keyed off OR which are infinite length from the list
-    notes_playing.remove_if(countdown_is_over);
+    notes_playing.remove_if (countdown_is_over);
 
     // Process all tracks
-    for(int track = 0; track<track_amnt; track++)
+    for(int32_t track = 0; track < track_amnt; track++)
     {
         counter[track]--;
         // Process events until counter non-null or pointer null
@@ -198,25 +201,25 @@ static bool tick(int track_amnt)
         while(track_ptr[track] != 0 && !end_flag && counter[track] <= 0)
         {
             // Check if we're at loop start point
-            if(track == 0 && loop_flag && !return_flag[0] && !track_completed[0] && track_ptr[0] == loop_adr)
+            if (track == 0 && loop_flag && !return_flag[0] && !track_completed[0] && track_ptr[0] == loop_adr)
                 midi.add_marker("loopStart");
 
             process_event(track);
         }
     }
 
-    for(int track = 0; track<track_amnt; track++)
+    for(int32_t track = 0; track < track_amnt; track++)
     {
         process_lfo(track);
     }
 
     // Compute if all still active channels are completely decoded
     bool all_completed_flag = true;
-    for(int i = 0; i < track_amnt; i++)
+    for(int32_t i = 0; i < track_amnt; i++)
         all_completed_flag &= track_completed[i];
 
     // If everything is completed, the main program should quit its loop
-    if(all_completed_flag) return false;
+    if (all_completed_flag) return false;
 
     // Make note on events for this tick
     //(it's important they are made after all other events)
@@ -234,10 +237,10 @@ static uint32_t get_GBA_pointer()
     return p & 0x3FFFFFF;
 }
 
-static void process_event(int track)
+static void process_event(int32_t track)
 {
     // Length table for notes and rests
-    const int lenTbl[] =
+    const int32_t lenTbl[] =
     {
         0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
         16, 17, 18, 19, 20, 21, 22, 23, 24, 28, 30, 32, 36,
@@ -252,21 +255,21 @@ static void process_event(int track)
     track_ptr[track]++;
     uint8_t arg1;
     // Repeat last command, the byte read was in fact the first argument
-    if(command < 0x80)
+    if (command < 0x80)
     {
         arg1 = command;
         command = last_cmd[track];
     }
 
     // Delta time command
-    else if(command <= 0xb0)
+    else if (command <= 0xb0)
     {
         counter[track] = lenTbl[command - 0x80];
         return;
     }
 
     // End track command
-    else if(command == 0xb1)
+    else if (command == 0xb1)
     {
         // Null pointer
         track_ptr[track] = 0;
@@ -275,7 +278,7 @@ static void process_event(int track)
     }
 
     // Jump command
-    else if(command == 0xb2)
+    else if (command == 0xb2)
     {
         track_ptr[track] = get_GBA_pointer();
 
@@ -285,7 +288,7 @@ static void process_event(int track)
     }
 
     // Call command
-    else if(command == 0xb3)
+    else if (command == 0xb3)
     {
         uint32_t addr = get_GBA_pointer();
 
@@ -298,9 +301,9 @@ static void process_event(int track)
     }
 
     // Return command
-    else if(command == 0xb4)
+    else if (command == 0xb4)
     {
-        if(return_flag[track])
+        if (return_flag[track])
         {
             track_ptr[track] = return_ptr[track];
             return_flag[track] = false;
@@ -309,9 +312,9 @@ static void process_event(int track)
     }
 
     // Tempo change
-    else if(command == 0xbb)
+    else if (command == 0xbb)
     {
-        int tempo = 2*fgetc(inGBA);
+        int32_t tempo = 2*fgetc(inGBA);
         track_ptr[track]++;
         midi.add_tempo(tempo);
         return;
@@ -327,18 +330,18 @@ static void process_event(int track)
     }
 
     // Note on with specified length command
-    if(command >= 0xd0)
+    if (command >= 0xd0)
     {
-        int key, vel, len_ofs = 0;
+        int32_t key, vel, len_ofs = 0;
         // Is arg1 a key value ?
-        if(arg1 < 0x80)
+        if (arg1 < 0x80)
         {	// Yes -> use new key value
             key = arg1;
             last_key[track] = key;
 
             uint8_t arg2 = fgetc(inGBA);
             // Is arg2 a velocity ?
-            if(arg2 < 0x80)
+            if (arg2 < 0x80)
             {	// Yes -> use new velocity value
                 vel = arg2;
                 last_vel[track] = vel;
@@ -347,7 +350,7 @@ static void process_event(int track)
                 uint8_t arg3 = fgetc(inGBA);
 
                 // Is there a length offset ?
-                if(arg3 < 0x80)
+                if (arg3 < 0x80)
                 {	// Yes -> read it and increment pointer
                     len_ofs = arg3;
                     track_ptr[track]++;
@@ -367,9 +370,9 @@ static void process_event(int track)
         }
 
         // Linearise velocity if needed
-        if(lv) vel = sqrt(127.0 * vel);
+        if (lv) vel = sqrt(127.0 * vel);
 
-        notes_playing.push_front( Note(midi, track, lenTbl[command - 0xd0 + 1] + len_ofs, key + key_shift[track], vel) );
+        notes_playing.push_front(Note(midi, track, lenTbl[command - 0xd0 + 1] + len_ofs, key + key_shift[track], vel));
         return;
     }
 
@@ -383,9 +386,9 @@ static void process_event(int track)
 
         // Set instrument
         case 0xbd :
-            if(bank_used)
+            if (bank_used)
             {
-                if(!xg)
+                if (!xg)
                     midi.add_controller(track, 0, bank_number);
                 else
                 {
@@ -399,7 +402,7 @@ static void process_event(int track)
         // Set volume
         case 0xbe :
         {	// Linearise volume if needed
-            int volume = lv ? (int)sqrt(127.0 * arg1) : arg1;
+            int32_t volume = lv ? (int32_t)sqrt(127.0 * arg1) : arg1;
             midi.add_controller(track, 7, volume);
         }	return;
 
@@ -415,7 +418,7 @@ static void process_event(int track)
 
         // Pitch bend range
         case 0xc1 :
-            if(sv)
+            if (sv)
                 midi.add_RPN(track, 0, (char)arg1);
             else
                 midi.add_controller(track, 20, arg1);
@@ -423,7 +426,7 @@ static void process_event(int track)
 
         // LFO Speed
         case 0xc2 :
-            if(sv)
+            if (sv)
                 midi.add_NRPN(track, 136, (char)arg1);
             else
                 midi.add_controller(track, 21, arg1);
@@ -431,7 +434,7 @@ static void process_event(int track)
 
         // LFO delay
         case 0xc3 :
-            if(sv)
+            if (sv)
                 lfo_delay[track] = arg1;
             else
                 midi.add_controller(track, 26, arg1);
@@ -439,14 +442,14 @@ static void process_event(int track)
 
         // LFO depth
         case 0xc4 :
-            if(sv)
+            if (sv)
             {
-                if(lfo_delay[track] == 0 && lfo_hack[track])
+                if (lfo_delay[track] == 0 && lfo_hack[track])
                 {
-                    if(lfo_type[track]==0)
-                        midi.add_controller(track, 1, arg1>12 ? 127 : 10 * arg1);
+                    if (lfo_type[track] == 0)
+                        midi.add_controller(track, 1, arg1 > 12 ? 127 : 10 * arg1);
                     else
-                        midi.add_chanaft(track, arg1>12 ? 127 : 10 * arg1);
+                        midi.add_chanaft(track, arg1 > 12 ? 127 : 10 * arg1);
 
                     lfo_flag[track] = true;
                 }
@@ -461,7 +464,7 @@ static void process_event(int track)
 
         // LFO type
         case 0xc5 :
-            if(sv)
+            if (sv)
                 lfo_type[track] = arg1;
             else
                 midi.add_controller(track, 22, arg1);
@@ -469,7 +472,7 @@ static void process_event(int track)
 
         // Detune
         case 0xc8 :
-            if(sv)
+            if (sv)
                 midi.add_RPN(track, 1, (char)arg1);
             else
                 midi.add_controller(track, 24, arg1);
@@ -478,10 +481,10 @@ static void process_event(int track)
         // Key off
         case 0xce :
         {
-            int key, vel = 0;
+            int32_t key, vel = 0;
 
             // Is arg1 a key value ?
-            if(arg1 < 0x80)
+            if (arg1 < 0x80)
             {	// Yes -> use new key value
                 key = arg1;
                 last_key[track] = key;
@@ -495,15 +498,15 @@ static void process_event(int track)
 
             midi.add_note_off(track, key + key_shift[track], vel);
             stop_lfo(track);
-            simultaneous_notes_ctr --;
+            simultaneous_notes_ctr--;
         }	return;
 
         // Key on
         case 0xcf :
         {
-            int key, vel;
+            int32_t key, vel;
             // Is arg1 a key value ?
-            if(arg1 < 0x80)
+            if (arg1 < 0x80)
             {
                 // Yes -> use new key value
                 key = arg1;
@@ -511,7 +514,7 @@ static void process_event(int track)
 
                 uint8_t arg2 = fgetc(inGBA);
                 // Is arg2 a velocity ?
-                if(arg2 < 0x80)
+                if (arg2 < 0x80)
                 {
                     // Yes -> use new velocity value
                     vel = arg2;
@@ -529,7 +532,7 @@ static void process_event(int track)
                 track_ptr[track]--;		// Seek back, as arg 1 is unused and belong to next event !
             }
             // Linearise velocity if needed
-            if(lv) vel = (int)sqrt(127.0 * vel);
+            if (lv) vel = (int32_t)sqrt(127.0 * vel);
 
             // Make note of infinite length
             notes_playing.push_front(Note(midi, track, -1, key + key_shift[track], vel));
@@ -540,39 +543,39 @@ static void process_event(int track)
     }
 }
 
-static uint32_t parseArguments(const int argv, const char *const args[])
+static uint32_t parseArguments(const int32_t argv, const char *const args[])
 {
     if (argv < 3) print_instructions();
 
     // Open the input and output files
     inGBA = fopen(args[0], "rb");
-    if(!inGBA)
+    if (!inGBA)
     {
         cout << stderr << "Can't open file " << args[0] << " for reading.\n";
         exit(-2);
     }
 
-    for(int i = 3; i < argv; i++)
+    for(int32_t i = 3; i < argv; i++)
     {
         cout << "arg #" << i << " = " << args[i] << "\n";
         cout << "\n";
-        if(args[i][0] == '-')
+        if (args[i][0] == '-')
         {
-            if(args[i][1] == 'b')
+            if (args[i][1] == 'b')
             {
-                if(strlen(args[i]) <3) print_instructions();
-                bank_number = atoi(args[i]+2);
+                if (strlen(args[i]) < 3) print_instructions();
+                bank_number = atoi(args[i] + 2);
                 bank_used = true;
             }
-            else if(args[i][1]=='r' && args[i][2]=='c')
+            else if (args[i][1] == 'r' && args[i][2] == 'c')
                 rc = true;
-            else if(args[i][1]=='g' && args[i][2]=='s')
+            else if (args[i][1] == 'g' && args[i][2] == 's')
                 gs = true;
-            else if(args[i][1]=='x' && args[i][2]=='g')
+            else if (args[i][1] == 'x' && args[i][2] == 'g')
                 xg = true;
-            else if(args[i][1]=='l' && args[i][2]=='v')
+            else if (args[i][1]=='l' && args[i][2] == 'v')
                 lv = true;
-            else if(args[i][1]=='s' && args[i][2]=='v')
+            else if (args[i][1] == 's' && args[i][2] == 'v')
                 sv = true;
             else
                 print_instructions();
@@ -584,20 +587,20 @@ static uint32_t parseArguments(const int argv, const char *const args[])
     return strtoul(args[2], 0, 0);
 }
 
-int song_ripper(int argc, char *argv[])
+int32_t song_ripper(int32_t argc, char *argv[])
 {
     FILE *outMID;
     cout << "GBA ROM sequence ripper (c) 2012 Bregalad";
-    uint32_t base_address = parseArguments(argc-1, argv+1);
+    uint32_t base_address = parseArguments(argc - 1, argv + 1);
 
-    if(fseek(inGBA, base_address, SEEK_SET))
+    if (fseek(inGBA, base_address, SEEK_SET))
     {
         cout << stderr << "Can't seek to the base address 0x" << base_address << ".\n";
         exit(-3);
     }
 
-    int track_amnt = fgetc(inGBA);
-    if(track_amnt < 1 || track_amnt > 16)
+    int32_t track_amnt = fgetc(inGBA);
+    if (track_amnt < 1 || track_amnt > 16)
     {
         cout << stderr << "Invalid amount of tracks: " << track_amnt << "! (must be 1-16).\n";
         exit(-4);
@@ -607,7 +610,7 @@ int song_ripper(int argc, char *argv[])
     // Open output file once we know the pointer points to correct data
     //(this avoids creating blank files when there is an error)
     outMID = fopen(argv[2], "wb");
-    if(!outMID)
+    if (!outMID)
     {
         cout << stderr << "Can't write on file " << argv[2] << ".\n";
         exit(-5);
@@ -615,14 +618,14 @@ int song_ripper(int argc, char *argv[])
 
     cout << "Converting...";
 
-    if(rc)
+    if (rc)
     {	// Make the drum channel last in the list, hopefully reducing the risk of it being used
         midi.chn_reorder[9] = 15;
-        for(unsigned int j=10; j < 16; ++j)
-            midi.chn_reorder[j] = j-1;
+        for(uint32_t j = 10; j < 16; ++j)
+            midi.chn_reorder[j] = j - 1;
     }
 
-    if(gs)
+    if (gs)
     {	// GS reset
         const char gs_reset_sysex[] = {0x41, 0x10, 0x42, 0x12, 0x40, 0x00, 0x7f, 0x00, 0x41};
         midi.add_sysex(gs_reset_sysex, sizeof(gs_reset_sysex));
@@ -631,7 +634,7 @@ int song_ripper(int argc, char *argv[])
         midi.add_sysex(part_10_normal_sysex, sizeof(part_10_normal_sysex));
     }
 
-    if(xg)
+    if (xg)
     {	// XG reset
         const char xg_sysex[] = {0x43, 0x10, 0x4C, 0x00, 0x00, 0x7E, 0x00};
         midi.add_sysex(xg_sysex, sizeof xg_sysex);
@@ -643,10 +646,10 @@ int song_ripper(int argc, char *argv[])
     fgetc(inGBA);						// Priority
     int8_t reverb = fgetc(inGBA);		// Reverb
 
-    int instr_bank_address = get_GBA_pointer();
+    int32_t instr_bank_address = get_GBA_pointer();
 
     // Read table of pointers
-    for(int i=0; i<track_amnt; i++)
+    for(int32_t i = 0; i < track_amnt; i++)
     {
         track_ptr[i] = get_GBA_pointer();
 
@@ -654,20 +657,20 @@ int song_ripper(int argc, char *argv[])
         lfo_delay[i] = 0;
         lfo_flag[i] = false;
 
-        if(reverb < 0)  // add reverb controller on all tracks
-            midi.add_controller(i, 91, lv ? (int)sqrt((reverb&0x7f)*127.0) : reverb&0x7f);
+        if (reverb < 0)  // add reverb controller on all tracks
+            midi.add_controller(i, 91, lv ? (int32_t)sqrt((reverb & 0x7f) * 127.0) : reverb & 0x7f);
     }
 
     // Search for loop address of track #0
-    if(track_amnt > 1)	// If 2 or more track, end of track is before start of track 2
+    if (track_amnt > 1)	// If 2 or more track, end of track is before start of track 2
         fseek(inGBA, track_ptr[1] - 9, SEEK_SET);
     else
         // If only a single track, the end is before start of header data
         fseek(inGBA, base_address - 9, SEEK_SET);
 
     // Read where in track 1 the loop starts
-    for(int i=0; i<5; i++)
-        if(fgetc(inGBA) == 0xb2)
+    for(int32_t i = 0; i < 5; i++)
+        if (fgetc(inGBA) == 0xb2)
         {
             loop_flag = true;
             loop_adr = get_GBA_pointer();
@@ -676,10 +679,10 @@ int song_ripper(int argc, char *argv[])
 
     // This is the main loop which will process all channels
     // until they are all inactive
-    int i = 100000;
+    int32_t i = 100000;
     while(tick(track_amnt))
     {
-        if(i-- == 0)
+        if (i-- == 0)
         {	// Security thing to avoid infinite loop in case things goes wrong
             cout << "Time out!";
             break;
@@ -687,7 +690,7 @@ int song_ripper(int argc, char *argv[])
     }
 
     // If a loop was detected this is its end
-    if(loop_flag) midi.add_marker("loopEnd");
+    if (loop_flag) midi.add_marker("loopEnd");
 
     cout << "Maximum simultaneous notes: " << simultaneous_notes_max << "\n";
 

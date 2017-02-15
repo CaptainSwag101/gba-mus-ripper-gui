@@ -9,14 +9,14 @@
 #ifndef HEX_STRING_H
 #define HEX_STRING_H
 #include <string>
-#include <stdint.h>
+#include <cstdint>
 
 using namespace std;
 
 static string hex(const uint32_t n)
 {
     string s;
-	for(int i=7; i >= 0; --i)
+	for(int32_t i=7; i >= 0; --i)
 	{
 		s += "0123456789abcdef"[0xf & (n >> (4*i))];
 	}

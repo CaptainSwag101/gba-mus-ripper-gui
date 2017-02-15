@@ -34,8 +34,8 @@ void ProgressDialog::StartRip()
 {
     QStringList argList = nativeArgs.split("\n");
 
-    int i = 0;
-    int size = argList.size();
+    int32_t i = 0;
+    int32_t size = argList.size();
     string c[size];
     foreach(QString s, argList)
     {
@@ -48,7 +48,7 @@ void ProgressDialog::StartRip()
     ripper->setProgram(QString(QDir::toNativeSeparators(QDir::currentPath() + '/' + "gba_mus_ripper.exe")));
     ripper->setNativeArguments(nativeArgs);
 
-    connect(ripper, SIGNAL(finished(int, QProcess::ExitStatus)), this, SLOT(Finish()));
+    connect(ripper, SIGNAL(finished(int32_t, QProcess::ExitStatus)), this, SLOT(Finish()));
     ripper->start();
     */
 
@@ -56,7 +56,7 @@ void ProgressDialog::StartRip()
     close();
 }
 
-void ProgressDialog::Finish(int exitCode)
+void ProgressDialog::Finish(int32_t exitCode)
 {
     QMessageBox *resultMsg = new QMessageBox(this);
 

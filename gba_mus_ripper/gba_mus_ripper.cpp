@@ -14,11 +14,11 @@
 #include <QProcess>
 #include <QString>
 #include <QStringList>
-#include <stdlib.h>
-#include <stdint.h>
-#include <string.h>
+#include <cmath>
+#include <string>
 #include <vector>
 #include <set>
+#include <cstdint>
 #include "../hex_string.h"
 #include "../sappy_detector/sappy_detector.h"
 #include "../song_ripper/song_ripper.h"
@@ -38,13 +38,13 @@ static bool sb = false;
 static bool raw = false;
 static uint32_t song_tbl_ptr = 0;
 
-static const int sample_rates[] = {-1, 5734, 7884, 10512, 13379, 15768, 18157, 21024, 26758, 31536, 36314, 40137, 42048};
+static const int32_t sample_rates[] = {-1, 5734, 7884, 10512, 13379, 15768, 18157, 21024, 26758, 31536, 36314, 40137, 42048};
 
 static void print_instructions()
 {
     cout <<
                 "  /========================================================\\\n"
-                "-<   GBA Mus Ripper 3.4 (c) 2016 Bregalad, CaptainSwag101   >-\n"
+                "-<   GBA Mus Ripper 3.5 (c) 2017 Bregalad, CaptainSwag101   >-\n"
                 "  \\========================================================/\n\n"
                 "Usage : gba_mus_ripper game.gba [-o output path] [flags] [address]\n\n"
                 "-o   : Output path. All MIDIs and soundfonts will be ripped to a subfolder inside this directory.\n"
@@ -76,7 +76,7 @@ static void mkdir(string name)
 }
 
 //  Convert number to string with always 3 digits (even if leading zeros)
-static string dec3(unsigned int n)
+static string dec3(uint32_t n)
 {
     string s;
     s += "0123456789"[n/100];
@@ -85,37 +85,37 @@ static string dec3(unsigned int n)
     return s;
 }
 
-static int parse_args(int argc, string argv[])
+static int32_t parse_args(int32_t argc, string argv[])
 {
     const char *args[argc];
-    for (int c = 0; c < argc; c++)
+    for (int32_t c = 0; c < argc; c++)
     {
         args[c] = argv[c].c_str();
     }
 
-    if(argc < 1) print_instructions();
+    if (argc < 1) print_instructions();
 
     bool path_found = false, song_tbl_found = false;
-    for(int i = 0; i<argc; i++)
+    for(int32_t i = 0; i < argc; i++)
     {
-        if(args[i][0] == '-')
+        if (args[i][0] == '-')
         {
-            if(!strcmp(args[i], "-help"))
+            if (!strcmp(args[i], "-help"))
                 print_instructions();
-            else if(!strcmp(args[i], "-o") && path_found && (i + 1) <= argc)
+            else if (!strcmp(args[i], "-o") && path_found && (i + 1) <= argc)
             {
                 outPath = args[i + 1];
                 i++;
             }
-            else if(!strcmp(args[i], "-gm"))
+            else if (!strcmp(args[i], "-gm"))
                 gm = true;
-            else if(!strcmp(args[i], "-xg"))
+            else if (!strcmp(args[i], "-xg"))
                 xg = true;
-            else if(!strcmp(args[i], "-rc"))
+            else if (!strcmp(args[i], "-rc"))
                 rc = true;
-            else if(!strcmp(args[i], "-sb"))
+            else if (!strcmp(args[i], "-sb"))
                 sb = true;
-            else if(!strcmp(args[i], "-raw"))
+            else if (!strcmp(args[i], "-raw"))
                 raw = true;
             else
             {
@@ -124,11 +124,11 @@ static int parse_args(int argc, string argv[])
             }
         }
         // Convert given address to binary, use it instead of automatically detected one
-        else if(!path_found)
+        else if (!path_found)
         {
             // Get GBA file
             inGBA = fopen(args[i], "rb");
-            if(!inGBA)
+            if (!inGBA)
             {
                 cout << stderr << "Error: Can't open file " << args[i] << " for reading.\n";
                 return -2;
@@ -143,11 +143,11 @@ static int parse_args(int argc, string argv[])
             outPath = inGBA_path.substr(0, separator_index);
             path_found = true;
         }
-        else if(!song_tbl_found)
+        else if (!song_tbl_found)
         {
             errno = 0;
             song_tbl_ptr = strtoul(args[i], 0, 0);
-            if(errno)
+            if (errno)
             {
                 cout << stderr << "Error: " << args[i] << " is not a valid song table address.\n";
                 return -3;
@@ -160,7 +160,7 @@ static int parse_args(int argc, string argv[])
             return -4;
         }
     }
-    if(!path_found)
+    if (!path_found)
     {
         cout << stderr << "Error: No input GBA file. Try with -help to get more information.\n";
         return -1;
@@ -169,10 +169,10 @@ static int parse_args(int argc, string argv[])
     return 0;
 }
 
-int mus_ripper(int argc, string argv[])
+int32_t mus_ripper(int32_t argc, string argv[])
 {
     // Parse arguments (without program name)
-    int parse_result = parse_args(argc, argv);
+    int32_t parse_result = parse_args(argc, argv);
     if (parse_result < 0)
     {
         return parse_result;
@@ -181,10 +181,10 @@ int mus_ripper(int argc, string argv[])
     // Compute program prefix (should be "", "./", "../" or whathever)
     string prg_name = argv[0];
 
-    int sample_rate = 0, main_volume = 0;		// Use default values when those are '0'
+    int32_t sample_rate = 0, main_volume = 0;		// Use default values when those are '0'
 
     // If the user hasn't provided an address manually, we'll try to automatically detect it
-    if(!song_tbl_ptr)
+    if (!song_tbl_ptr)
     {
         QCoreApplication::processEvents();
         // Auto-detect address of sappy engine
@@ -192,15 +192,15 @@ int mus_ripper(int argc, string argv[])
 #ifdef QT_DEBUG
         cout << "DEBUG: Going to call system(" << sappy_detector_cmd << ")\n";
 #endif
-        int sound_engine_adr = sappy_detector(1, sappy_detector_cmd);
+        int32_t sound_engine_adr = sappy_detector(1, sappy_detector_cmd);
 
         // Exit if no sappy engine was found
-        if(!sound_engine_adr)
+        if (!sound_engine_adr)
         {
             return -4;
         }
 
-        if(fseek(inGBA, sound_engine_adr, SEEK_SET))
+        if (fseek(inGBA, sound_engine_adr, SEEK_SET))
         {
             cout << stderr << "Error: Invalid offset within input GBA file: 0x" <<  sound_engine_adr << ".\n";
             return -5;
@@ -228,7 +228,7 @@ int mus_ripper(int argc, string argv[])
     fseek(inGBA, 0L, SEEK_END);
     inGBA_size = ftell(inGBA);
 
-    if(song_tbl_ptr >= inGBA_size)
+    if (song_tbl_ptr >= inGBA_size)
     {
         cout << stderr << "Fatal error: Song table at 0x" <<  song_tbl_ptr << " is past the end of the file.\n";
         return -6;
@@ -240,7 +240,7 @@ int mus_ripper(int argc, string argv[])
     // New list of sound banks
     set<uint32_t> sound_bank_list;
 
-    if(fseek(inGBA, song_tbl_ptr, SEEK_SET))
+    if (fseek(inGBA, song_tbl_ptr, SEEK_SET))
     {
         cout << stderr << "Fatal error: Can't seek to song table at: 0x" <<  song_tbl_ptr << ".\n";
         return -7;
@@ -252,19 +252,19 @@ int mus_ripper(int argc, string argv[])
     while(true)
     {
         fread(&song_pointer, 4, 1, inGBA);
-        if(song_pointer != 0) break;
+        if (song_pointer != 0) break;
         song_tbl_ptr += 4;
     }
 
-    unsigned int i = 0;
+    uint32_t i = 0;
     while(true)
     {
         song_pointer -= 0x8000000;		// Adjust pointer
 
         // Stop as soon as we met with an invalid pointer
-        if(song_pointer == 0 || song_pointer >= inGBA_size) break;
+        if (song_pointer == 0 || song_pointer >= inGBA_size) break;
 
-        for(int j = 4; j != 0; --j) fgetc(inGBA);		// Discard 4 bytes (sound group)
+        for(int32_t j = 4; j != 0; --j) fgetc(inGBA);		// Discard 4 bytes (sound group)
         song_list.push_back(song_pointer);			// Add pointer to list
         i++;
         fread(&song_pointer, 4, 1, inGBA);
@@ -282,10 +282,10 @@ int mus_ripper(int argc, string argv[])
     for(i = 0; i < song_list.size(); i++)
     {
         // Ignore unused song, which points to the end of the song table (for some reason)
-        if(song_list[i] != song_tbl_end_ptr)
+        if (song_list[i] != song_tbl_end_ptr)
         {
             // Seek to song data
-            if(fseek(inGBA, song_list[i] + 4, SEEK_SET)) continue;
+            if (fseek(inGBA, song_list[i] + 4, SEEK_SET)) continue;
             uint32_t sound_bank_ptr = get_GBA_pointer();
 
             // Add sound bank to list if not already in the list
@@ -297,11 +297,11 @@ int mus_ripper(int argc, string argv[])
     fclose(inGBA);
 
     // Create directories for each sound bank if separate banks is enabled
-    if(sb)
+    if (sb)
     {
         for(bank_t j = sound_bank_list.begin(); j != sound_bank_list.end(); ++j)
         {
-            unsigned int d = distance(sound_bank_list.begin(), j);
+            uint32_t d = distance(sound_bank_list.begin(), j);
             string subdir = outPath + '/' + name + '/' + "soundbank_" + dec3(d);
             mkdir(subdir);
         }
@@ -309,27 +309,27 @@ int mus_ripper(int argc, string argv[])
 
     for(i = 0; i < song_list.size(); i++)
     {
-        if(song_list[i] != song_tbl_end_ptr)
+        if (song_list[i] != song_tbl_end_ptr)
         {
             QCoreApplication::processEvents();
-            unsigned int bank_index = distance(sound_bank_list.begin(), sound_bank_index_list[i]);
+            uint32_t bank_index = distance(sound_bank_list.begin(), sound_bank_index_list[i]);
             string seq_rip_cmd = "song_ripper\n" + inGBA_path + "\n" + outPath + "/" + name;
 
             // Add leading zeroes to file name
-            if(sb)
+            if (sb)
                 seq_rip_cmd += "/soundbank_" + dec3(bank_index);
 
             seq_rip_cmd += "/song" + dec3(i) + ".mid";
 
             seq_rip_cmd += "\n0x" + hex(song_list[i]);
             seq_rip_cmd += rc ? "\n-rc" : (xg ? "\n-xg" : "\n-gs");
-            if(!raw)
+            if (!raw)
             {
                 seq_rip_cmd += "\n-sv";
                 seq_rip_cmd += "\n-lv";
             }
             // Bank number, if banks are not separated
-            if(!sb)
+            if (!sb)
                 seq_rip_cmd += "\n-b" + to_string(bank_index);
 
             QStringList argList = QString::fromStdString(seq_rip_cmd).split("\n");
@@ -338,7 +338,7 @@ int mus_ripper(int argc, string argv[])
 #ifdef QT_DEBUG
             cout << "DEBUG: Going to call system(" << seq_rip_cmd << ")\n";
 #endif
-            //if(!system(seq_rip_cmd.c_str()))
+            //if (!system(seq_rip_cmd.c_str()))
             QProcess *songripper = new QProcess();
 
 #ifdef Q_OS_WIN32
@@ -360,28 +360,28 @@ int mus_ripper(int argc, string argv[])
             songripper->setArguments(argList);
             songripper->start();
             songripper->waitForFinished();
-            if(songripper->exitCode() < 0)
+            if (songripper->exitCode() < 0)
                 cout << "An error has occurred.";
         }
     }
     delete[] sound_bank_index_list;
 
-    if(sb)
+    if (sb)
     {
         // Rips each sound bank in a different file/folder
-        for(bank_t j=sound_bank_list.begin(); j!=sound_bank_list.end(); ++j)
+        for(bank_t j = sound_bank_list.begin(); j != sound_bank_list.end(); ++j)
         {
             QCoreApplication::processEvents();
-            unsigned int bank_index = distance(sound_bank_list.begin(), j);
+            uint32_t bank_index = distance(sound_bank_list.begin(), j);
 
             string sbnumber = dec3(bank_index);
             string foldername = "soundbank_" + sbnumber;
             string sf_rip_args = "sound_font_ripper\n" + inGBA_path + "\n" + outPath + "/" + name + '/';
             sf_rip_args += foldername + '/' + foldername /* + "_@" + hex(*j) */ + ".sf2\"";
 
-            if(sample_rate) sf_rip_args += "\n-s" + to_string(sample_rate);
-            if(main_volume)	sf_rip_args += "\n-mv" + to_string(main_volume);
-            if(gm) sf_rip_args += "\n-gm";
+            if (sample_rate) sf_rip_args += "\n-s" + to_string(sample_rate);
+            if (main_volume)	sf_rip_args += "\n-mv" + to_string(main_volume);
+            if (gm) sf_rip_args += "\n-gm";
             sf_rip_args += "\n0x" + hex(*j);
 
             QStringList argList = QString::fromStdString(sf_rip_args).split("\n");
@@ -423,13 +423,13 @@ int mus_ripper(int argc, string argv[])
         // Output sound font named after the input ROM
         QCoreApplication::processEvents();
         string sf_rip_args = "sound_font_ripper\n" + inGBA_path + "\n" + outPath + "/" + name + '/' + name + ".sf2";
-        if(sample_rate) sf_rip_args += "\n-s" + to_string(sample_rate);
-        if(main_volume) sf_rip_args += "\n-mv" + to_string(main_volume);
+        if (sample_rate) sf_rip_args += "\n-s" + to_string(sample_rate);
+        if (main_volume) sf_rip_args += "\n-mv" + to_string(main_volume);
         // Pass -gm argument if necessary
-        if(gm) sf_rip_args += "\n-gm";
+        if (gm) sf_rip_args += "\n-gm";
 
         // Make sound banks addresses list.
-        for(bank_t j=sound_bank_list.begin(); j != sound_bank_list.end(); ++j)
+        for(bank_t j = sound_bank_list.begin(); j != sound_bank_list.end(); ++j)
             sf_rip_args += "\n0x" + hex(*j);
 
         QStringList argList = QString::fromStdString(sf_rip_args).split("\n");
@@ -462,7 +462,7 @@ int mus_ripper(int argc, string argv[])
         sf2ripper->start();
         sf2ripper->waitForFinished();
         cout << sf2ripper->readAllStandardOutput().toStdString();
-        if(sf2ripper->exitCode() != 0)
+        if (sf2ripper->exitCode() != 0)
             cout << "An error has occured.";
     }
     cout << "Rip completed!\n";

@@ -8,7 +8,7 @@
 
 #ifndef SF2_TYPES_HPP
 #define SF2_TYPES_HPP
-#include <stdint.h>
+#include <cstdint>
 
 /* From the SF2 spec v2.1, page 7 */
 // typedef uint8_t BYTE;

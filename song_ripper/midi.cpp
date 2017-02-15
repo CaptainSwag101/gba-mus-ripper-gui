@@ -32,7 +32,7 @@
 MIDI::MIDI(uint16_t delta_time)
 {
 	delta_time_per_beat = delta_time;
-	for(int i=15; i >= 0; --i)
+    for(int32_t i = 15; i >= 0; --i)
 	{
 		last_rpn_type[i] = -1;
 		last_nrpn_type[i] = -1;
@@ -97,14 +97,14 @@ void MIDI::write(FILE *out)
 }
 
 //Add delta time in MIDI variable length coding
-void MIDI::add_vlength_code(int code)
+void MIDI::add_vlength_code(int32_t code)
 {
 	char word1 = code & 0x7f;
 	char word2 = (code >> 7) & 0x7f;
 	char word3 = (code >> 14) & 0x7f;
 	char word4 = (code >> 21) & 0x7f;
 
-	if(word4 != 0)
+    if (word4 != 0)
 	{
 		data.push_back(word4 | 0x80);
 		data.push_back(word3 | 0x80);
@@ -130,10 +130,10 @@ void MIDI::add_delta_time()
 	time_ctr = 0;
 }
 
-void MIDI::add_event(MIDIEventType type, int chn, char param1, char param2)
+void MIDI::add_event(MIDIEventType type, int32_t chn, char param1, char param2)
 {
 	add_delta_time();
-	if(chn != last_chanel || type != last_event_type)
+    if (chn != last_chanel || type != last_event_type)
 	{
 		last_chanel = chn;
 		last_event_type = type;
@@ -143,10 +143,10 @@ void MIDI::add_event(MIDIEventType type, int chn, char param1, char param2)
 	data.push_back(param2);
 }
 
-void MIDI::add_event(MIDIEventType type, int chn, char param)
+void MIDI::add_event(MIDIEventType type, int32_t chn, char param)
 {
 	add_delta_time();
-	if(chn != last_chanel || type != last_event_type)
+    if (chn != last_chanel || type != last_event_type)
 	{
 		last_chanel = chn;
 		last_event_type = type;
@@ -156,77 +156,77 @@ void MIDI::add_event(MIDIEventType type, int chn, char param)
 }
 
 //Add key on event
-void MIDI::add_note_on(int chn, char key, char vel)
+void MIDI::add_note_on(int32_t chn, char key, char vel)
 {
 	add_event(NOTEON, chn, key, vel);
 }
 
 //Add key off event
-void MIDI::add_note_off(int chn, char key, char vel)
+void MIDI::add_note_off(int32_t chn, char key, char vel)
 {
 	add_event(NOTEOFF, chn, key, vel);
 }
 
 //Add controller event
-void MIDI::add_controller(int chn, char ctrl, char value)
+void MIDI::add_controller(int32_t chn, char ctrl, char value)
 {
 	add_event(CONTROLLER, chn, ctrl, value);
 }
 
 //Add channel aftertouch
-void MIDI::add_chanaft(int chn, char value)
+void MIDI::add_chanaft(int32_t chn, char value)
 {
 	add_event(CHNAFT, chn, value);
 }
 
 //Add conventional program change event
-void MIDI::add_pchange(int chn, char number)
+void MIDI::add_pchange(int32_t chn, char number)
 {
 	add_event(PCHANGE, chn, number);
 }
 
 //Add pitch bend event
-void MIDI::add_pitch_bend(int chn, int16_t value)
+void MIDI::add_pitch_bend(int32_t chn, int16_t value)
 {
 	char lo = value & 0x7f;
-	char hi = (value>>7) & 0x7f;
+    char hi = (value >> 7) & 0x7f;
 	add_event(PITCHBEND, chn, lo, hi);
 }
 
 //Add pitch bend event with only the MSB used
-void MIDI::add_pitch_bend(int chn, char value)
+void MIDI::add_pitch_bend(int32_t chn, char value)
 {
 	add_event(PITCHBEND, chn, 0, value);
 }
 
 //Add RPN event
-void MIDI::add_RPN(int chn, int16_t type, int16_t value)
+void MIDI::add_RPN(int32_t chn, int16_t type, int16_t value)
 {
-	if(last_rpn_type[chn] != type || last_type[chn] != 0)
+    if (last_rpn_type[chn] != type || last_type[chn] != 0)
 	{
 		last_rpn_type[chn] = type;
 		last_type[chn] = 0;
-		add_event(CONTROLLER, chn, 101, type>>7);
-		add_event(CONTROLLER, chn, 100, type&0x7f);
+        add_event(CONTROLLER, chn, 101, type >> 7);
+        add_event(CONTROLLER, chn, 100, type & 0x7f);
 	}
 	add_event(CONTROLLER, chn, 6, value >> 7);
 
-	if((value & 0x7f) != 0)
+    if ((value & 0x7f) != 0)
 		add_event(CONTROLLER, chn, 38, value & 0x7f);
 }
 
 //Add NRPN event
-void MIDI::add_NRPN(int chn, int16_t type, int16_t value)
+void MIDI::add_NRPN(int32_t chn, int16_t type, int16_t value)
 {
-	if(last_nrpn_type[chn] != type || last_type[chn] != 1)
+    if (last_nrpn_type[chn] != type || last_type[chn] != 1)
 	{
 		last_nrpn_type[chn] = type;
 		last_type[chn] = 1;
-		add_event(CONTROLLER, chn, 99, type>>7);
-		add_event(CONTROLLER, chn, 98, type&0x7f);
+        add_event(CONTROLLER, chn, 99, type >> 7);
+        add_event(CONTROLLER, chn, 98, type & 0x7f);
 	}
 	add_event(CONTROLLER, chn, 6, value >> 7);
-	if((value & 0x7f) != 0)
+    if ((value & 0x7f) != 0)
 		add_event(CONTROLLER, chn, 38, value & 0x7f);
 }
 
@@ -239,7 +239,7 @@ void MIDI::add_marker(const char *text)
 	size_t len = strlen(text);
 	add_vlength_code(len);
 	//Add text itself
-	data.insert(data.end(), text, text+len);
+    data.insert(data.end(), text, text + len);
 }
 
 void MIDI::add_sysex(const char sysex_data[], size_t len)
@@ -249,16 +249,16 @@ void MIDI::add_sysex(const char sysex_data[], size_t len)
 	//Actually variable length code
 	add_vlength_code(len + 1);
 	
-	data.insert(data.end(), sysex_data, sysex_data+len);
+    data.insert(data.end(), sysex_data, sysex_data + len);
 	data.push_back(0xf7);
 }
 
 void MIDI::add_tempo(double tempo)
 {
-	int t = int(60000000.0 / tempo);
+    int32_t t = int32_t(60000000.0 / tempo);
 	char t1 = char(t);
-	char t2 = char(t>>8);
-	char t3 = char(t>>16);
+    char t2 = char(t >> 8);
+    char t3 = char(t >> 16);
 
 	add_delta_time();
 	data.push_back(0xff);

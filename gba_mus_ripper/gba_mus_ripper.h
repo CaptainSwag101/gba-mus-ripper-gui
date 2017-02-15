@@ -3,6 +3,6 @@
 
 using namespace std;
 
-int mus_ripper(int argc, string argv[]);
+int32_t mus_ripper(int32_t argc, string argv[]);
 
 #endif // GBA_MUS_RIPPER_H
