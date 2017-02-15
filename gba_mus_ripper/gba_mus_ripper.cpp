@@ -72,7 +72,7 @@ static uint32_t get_GBA_pointer()
 
 static void mkdir(string name)
 {
-    system(("mkdir \"" + name + '"').c_str());
+    system(("mkdir -p \"" + name + '"').c_str());
 }
 
 //  Convert number to string with always 3 digits (even if leading zeros)
