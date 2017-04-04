@@ -23,7 +23,7 @@ class ProgressDialog : public QDialog
 public:
     explicit ProgressDialog(MainWindow *parent);
     ~ProgressDialog();
-    void StartRip();
+    void startRip();
 
 public slots:
     void Finish(int32_t exitCode);

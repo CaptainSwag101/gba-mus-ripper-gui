@@ -10,7 +10,7 @@ ProgressDialog::ProgressDialog(MainWindow *parent) : QDialog(parent), ui(new Ui:
     ui->progressBar->setMinimum(0);
 
     romPath = parent->romPath;
-    outPath = parent->outputPath;
+    outPath = parent->outPath;
 
     nativeArgs += romPath;
     nativeArgs += "\n-o\n";
@@ -26,33 +26,15 @@ ProgressDialog::ProgressDialog(MainWindow *parent) : QDialog(parent), ui(new Ui:
         nativeArgs += "\n-sb";
     if (parent->rawFlag)
         nativeArgs += "\n-raw";
-    if (parent->adrFlag && !parent->address.isEmpty())
+    if (parent->addrFlag && !parent->address.isEmpty())
         nativeArgs += "\n-adr\n" + parent->address;
 }
 
-void ProgressDialog::StartRip()
+void ProgressDialog::startRip()
 {
-    QStringList argList = nativeArgs.split("\n");
-
-    int32_t i = 0;
-    int32_t size = argList.size();
-    string c[size];
-    foreach(QString s, argList)
-    {
-        c[i] = s.toStdString();
-        i++;
-    }
-
-    /*
-    ripper = new QProcess(this);
-    ripper->setProgram(QString(QDir::toNativeSeparators(QDir::currentPath() + '/' + "gba_mus_ripper.exe")));
-    ripper->setNativeArguments(nativeArgs);
-
-    connect(ripper, SIGNAL(finished(int32_t, QProcess::ExitStatus)), this, SLOT(Finish()));
-    ripper->start();
-    */
-
-    Finish(mus_ripper(size, c));
+    MainWindow* par = (MainWindow*)parentWidget();
+    musRipper::parseArgs(romPath, outPath, par->address, par->addrFlag, par->gmFlag, par->xgFlag, par->rcFlag, par->sbFlag, par->rawFlag);
+    Finish(musRipper::startRip());
     close();
 }
 

@@ -17,7 +17,7 @@
    </sizepolicy>
   </property>
   <property name="windowTitle">
-   <string>Extracting Music...</string>
+   <string>Extracting music data...</string>
   </property>
   <property name="modal">
    <bool>true</bool>
@@ -28,7 +28,7 @@
      <x>10</x>
      <y>30</y>
      <width>271</width>
-     <height>23</height>
+     <height>21</height>
     </rect>
    </property>
    <property name="maximum">

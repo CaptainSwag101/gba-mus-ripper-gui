@@ -22,6 +22,7 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+
 void MainWindow::on_startButton_clicked()
 {
     if (ui->romPathEdit->text().isEmpty())
@@ -45,20 +46,20 @@ void MainWindow::on_startButton_clicked()
     else
     {
         romPath = ui->romPathEdit->text();
-        outputPath = ui->outputPathEdit->text();
+        outPath = ui->outputPathEdit->text();
         gmFlag = ui->giveGMNames->isChecked();
         xgFlag = ui->makeXGCompliant->isChecked();
         rcFlag = ui->avoidCh10->isChecked();
         sbFlag = ui->splitSoundBanks->isChecked();
         rawFlag = ui->outputRaw->isChecked();
-        adrFlag = ui->manualAddressEnable->isChecked();
-        address = ui->manualAddress->text();
+        addrFlag = ui->manualAddressEnable->isChecked();
+        address = ui->manualAddress->text().toInt();
 
         ProgressDialog *progDialog = new ProgressDialog(this);
         QCoreApplication::processEvents();
         progDialog->show();
         progDialog->update();
-        progDialog->StartRip();
+        progDialog->startRip();
     }
 }
 

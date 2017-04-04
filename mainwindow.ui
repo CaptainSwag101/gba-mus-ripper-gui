@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>633</width>
-    <height>302</height>
+    <width>630</width>
+    <height>270</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -49,65 +49,21 @@
    <widget class="QPushButton" name="startButton">
     <property name="geometry">
      <rect>
-      <x>524</x>
-      <y>239</y>
-      <width>101</width>
-      <height>31</height>
+      <x>270</x>
+      <y>220</y>
+      <width>91</width>
+      <height>21</height>
      </rect>
     </property>
     <property name="text">
      <string>Start</string>
     </property>
    </widget>
-   <widget class="QWidget" name="layoutWidget">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>30</y>
-      <width>611</width>
-      <height>33</height>
-     </rect>
-    </property>
-    <layout class="QHBoxLayout" name="horizontalLayout">
-     <item>
-      <widget class="QLineEdit" name="romPathEdit"/>
-     </item>
-     <item>
-      <widget class="QPushButton" name="chooseRomButton">
-       <property name="text">
-        <string>Browse...</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </widget>
-   <widget class="QWidget" name="layoutWidget">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>80</y>
-      <width>611</width>
-      <height>33</height>
-     </rect>
-    </property>
-    <layout class="QHBoxLayout" name="horizontalLayout_2">
-     <item>
-      <widget class="QLineEdit" name="outputPathEdit"/>
-     </item>
-     <item>
-      <widget class="QPushButton" name="chooseOutputButton">
-       <property name="text">
-        <string>Browse...</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </widget>
    <widget class="QCheckBox" name="splitSoundBanks">
     <property name="geometry">
      <rect>
-      <x>10</x>
-      <y>152</y>
+      <x>380</x>
+      <y>120</y>
       <width>221</width>
       <height>17</height>
      </rect>
@@ -120,7 +76,7 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>176</y>
+      <y>150</y>
       <width>361</width>
       <height>17</height>
      </rect>
@@ -132,8 +88,8 @@
    <widget class="QCheckBox" name="avoidCh10">
     <property name="geometry">
      <rect>
-      <x>10</x>
-      <y>200</y>
+      <x>380</x>
+      <y>150</y>
       <width>281</width>
       <height>17</height>
      </rect>
@@ -145,8 +101,8 @@
    <widget class="QCheckBox" name="outputRaw">
     <property name="geometry">
      <rect>
-      <x>10</x>
-      <y>224</y>
+      <x>380</x>
+      <y>180</y>
       <width>211</width>
       <height>17</height>
      </rect>
@@ -159,7 +115,7 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>249</y>
+      <y>180</y>
       <width>251</width>
       <height>17</height>
      </rect>
@@ -168,56 +124,91 @@
      <string>XG-compliant MIDIs</string>
     </property>
    </widget>
-   <widget class="QWidget" name="layoutWidget">
+   <widget class="QCheckBox" name="manualAddressEnable">
     <property name="geometry">
      <rect>
       <x>10</x>
       <y>120</y>
-      <width>351</width>
-      <height>33</height>
+      <width>176</width>
+      <height>20</height>
      </rect>
     </property>
-    <layout class="QHBoxLayout" name="horizontalLayout_3">
-     <item>
-      <widget class="QCheckBox" name="manualAddressEnable">
-       <property name="text">
-        <string>Manually specify address:</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLineEdit" name="manualAddress">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-      </widget>
-     </item>
-    </layout>
+    <property name="text">
+     <string>Manually specify address:</string>
+    </property>
    </widget>
-   <zorder>layoutWidget</zorder>
-   <zorder>layoutWidget</zorder>
-   <zorder>layoutWidget</zorder>
-   <zorder>inputLabel</zorder>
-   <zorder>outputLabel</zorder>
-   <zorder>startButton</zorder>
-   <zorder>splitSoundBanks</zorder>
-   <zorder>giveGMNames</zorder>
-   <zorder>avoidCh10</zorder>
-   <zorder>outputRaw</zorder>
-   <zorder>makeXGCompliant</zorder>
+   <widget class="QLineEdit" name="manualAddress">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
+    <property name="geometry">
+     <rect>
+      <x>190</x>
+      <y>120</y>
+      <width>131</width>
+      <height>22</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="outputPathEdit">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>80</y>
+      <width>523</width>
+      <height>21</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="chooseOutputButton">
+    <property name="geometry">
+     <rect>
+      <x>540</x>
+      <y>80</y>
+      <width>81</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Browse...</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="romPathEdit">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>30</y>
+      <width>523</width>
+      <height>21</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="chooseRomButton">
+    <property name="geometry">
+     <rect>
+      <x>540</x>
+      <y>30</y>
+      <width>81</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Browse...</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>633</width>
-     <height>23</height>
+     <width>630</width>
+     <height>19</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
     <property name="title">
-     <string>File</string>
+     <string>Fi&amp;le</string>
     </property>
     <addaction name="actionExit"/>
    </widget>
@@ -232,12 +223,12 @@
   </widget>
   <action name="actionExit">
    <property name="text">
-    <string>Exit</string>
+    <string>&amp;Exit</string>
    </property>
   </action>
   <action name="actionAbout">
    <property name="text">
-    <string>About...</string>
+    <string>&amp;About...</string>
    </property>
   </action>
  </widget>

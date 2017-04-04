@@ -7,19 +7,19 @@
     <x>0</x>
     <y>0</y>
     <width>461</width>
-    <height>212</height>
+    <height>160</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>About</string>
+   <string>About GBA Mus Ripper GUI</string>
   </property>
   <widget class="QPushButton" name="okButton">
    <property name="geometry">
     <rect>
-     <x>190</x>
-     <y>170</y>
-     <width>85</width>
-     <height>31</height>
+     <x>180</x>
+     <y>130</y>
+     <width>101</width>
+     <height>21</height>
     </rect>
    </property>
    <property name="sizePolicy">
@@ -38,20 +38,58 @@
      <x>10</x>
      <y>10</y>
      <width>441</width>
-     <height>141</height>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>12</pointsize>
+     <weight>75</weight>
+     <bold>true</bold>
+     <underline>true</underline>
+    </font>
+   </property>
+   <property name="text">
+    <string>GBA Mus Ripper GUI</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_2">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>40</y>
+     <width>441</width>
+     <height>16</height>
     </rect>
    </property>
    <property name="text">
-    <string>GBA Mus Ripper GUI
-
-By James &quot;CaptainSwag101&quot; Pelster
-
-A graphical tool for my fork of Bregalad's program, &quot;gba_mus_riper&quot;
-
-Version 0.1.5 (Built: </string>
+    <string>Created by James &quot;CaptainSwag101&quot; Pelster</string>
    </property>
-   <property name="textFormat">
-    <enum>Qt::AutoText</enum>
+  </widget>
+  <widget class="QLabel" name="label_3">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>70</y>
+     <width>441</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>A graphical frontend for my fork of Bregalad's program, &quot;gba_mus_riper&quot;</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="versionLabel">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>100</y>
+     <width>371</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Version: </string>
    </property>
   </widget>
  </widget>
