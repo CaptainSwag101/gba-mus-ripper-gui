@@ -32,11 +32,9 @@ class musRipper
 public:
     static int startRip();
     static int parseArgs(string rom, string out,
-                        int _address = -1, bool addr = false,
-                        bool gm = false, bool xg = false, bool rc = false, bool sb = false, bool raw = false);
+                             int _address, bool addr,
+                             bool gm, bool xg, bool rc, bool sb, bool raw);
 
-
-private:
     static void printHelp();
     static uint32_t getGbaPointer();
     static string dec3(uint n);

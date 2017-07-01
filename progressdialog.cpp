@@ -26,14 +26,14 @@ ProgressDialog::ProgressDialog(MainWindow *parent) : QDialog(parent), ui(new Ui:
         nativeArgs += "\n-sb";
     if (parent->rawFlag)
         nativeArgs += "\n-raw";
-    if (parent->addrFlag && !parent->address.isEmpty())
+    if (parent->addrFlag && parent->address != 0)
         nativeArgs += "\n-adr\n" + parent->address;
 }
 
 void ProgressDialog::startRip()
 {
     MainWindow* par = (MainWindow*)parentWidget();
-    musRipper::parseArgs(romPath, outPath, par->address, par->addrFlag, par->gmFlag, par->xgFlag, par->rcFlag, par->sbFlag, par->rawFlag);
+    musRipper::parseArgs(romPath.toStdString(), outPath.toStdString(), par->address, par->addrFlag, par->gmFlag, par->xgFlag, par->rcFlag, par->sbFlag, par->rawFlag);
     Finish(musRipper::startRip());
     close();
 }
