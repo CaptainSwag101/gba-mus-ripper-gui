@@ -8,7 +8,7 @@
  */
 #include "gba_instr.h"
 #include <cmath>
-#include "../hex_string.h"
+#include "hex_string.h"
 #include <vector>
 #include <cstdio>
 

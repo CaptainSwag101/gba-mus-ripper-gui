@@ -10,7 +10,7 @@
 #include "gba_samples.h"
 #include <cstdint>
 #include <cmath>
-#include "../hex_string.h"
+#include "hex_string.h"
 #include <cstdio>
 
 extern FILE *inGBA;

@@ -13,7 +13,7 @@
 #include <cstring>
 #include "sf2.h"
 #include "gba_instr.h"
-#include "../hex_string.h"
+#include "hex_string.h"
 #include <set>
 
 static FILE *outSF2;

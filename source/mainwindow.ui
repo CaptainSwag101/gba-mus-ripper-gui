@@ -171,10 +171,10 @@
    <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
-      <x>10</x>
+      <x>9</x>
       <y>120</y>
       <width>351</width>
-      <height>33</height>
+      <height>30</height>
      </rect>
     </property>
     <layout class="QHBoxLayout" name="horizontalLayout_3">
@@ -212,12 +212,12 @@
      <x>0</x>
      <y>0</y>
      <width>633</width>
-     <height>23</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
     <property name="title">
-     <string>File</string>
+     <string>Fi&amp;le</string>
     </property>
     <addaction name="actionExit"/>
    </widget>
@@ -232,12 +232,12 @@
   </widget>
   <action name="actionExit">
    <property name="text">
-    <string>Exit</string>
+    <string>&amp;Exit</string>
    </property>
   </action>
   <action name="actionAbout">
    <property name="text">
-    <string>About...</string>
+    <string>&amp;About...</string>
    </property>
   </action>
  </widget>

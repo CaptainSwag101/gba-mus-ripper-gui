@@ -19,10 +19,10 @@
 #include <vector>
 #include <set>
 #include <cstdint>
-#include "../hex_string.h"
-#include "../sappy_detector/sappy_detector.h"
-#include "../song_ripper/song_ripper.h"
-#include "../sound_font_ripper/sound_font_ripper.h"
+#include "hex_string.h"
+#include "sappy_detector.h"
+#include "song_ripper.h"
+#include "sound_font_ripper.h"
 
 using namespace std;
 
