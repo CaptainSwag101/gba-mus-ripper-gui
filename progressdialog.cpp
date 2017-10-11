@@ -12,31 +12,34 @@ ProgressDialog::ProgressDialog(MainWindow *parent) : QDialog(parent), ui(new Ui:
     romPath = parent->romPath;
     outPath = parent->outputPath;
 
-    QString nativeArgs;
-    nativeArgs += '"';
-    nativeArgs += romPath;
-    nativeArgs += '"';
-    nativeArgs += " -o ";
-    nativeArgs += '"';
-    nativeArgs += outPath;
-    nativeArgs += '"';
+    QStringList args;
+    args.append('"' + romPath + '"');
+    args.append("-o");
+    args.append('"' + outPath + '"');
 
     if (parent->gmFlag)
-        nativeArgs += " -gm";
+        args.append("-gm");
     if (parent->xgFlag)
-        nativeArgs += " -xg";
+        args.append("-xg");
     if (parent->rcFlag)
-        nativeArgs += " -rc";
+        args.append("-rc");
     if (parent->sbFlag)
-        nativeArgs += " -sb";
+        args.append("-sb");
     if (parent->rawFlag)
-        nativeArgs += " -raw";
+        args.append("-raw");
     if (parent->adrFlag && !parent->address.isEmpty())
-        nativeArgs += " -adr " + parent->address;
+    {
+        args.append("-adr");
+        args.append(QString(parent->address));
+    }
 
     ripper = new QProcess(this);
-    ripper->setProgram(QString(QDir::toNativeSeparators(QDir::currentPath() + '/' + "gba_mus_ripper.exe")));
-    ripper->setNativeArguments(nativeArgs);
+#ifdef _WIN32
+    ripper->setProgram(QString(QDir::currentPath() + '\\' + "gba_mus_ripper.exe"));
+#else
+    ripper->setProgram(QString(QDir::currentPath() + '/' + "gba_mus_ripper"));
+#endif
+    ripper->setArguments(args);
 
     connect(ripper, SIGNAL(finished(int, QProcess::ExitStatus)), this, SLOT(Finish()));
     ripper->start();
@@ -44,7 +47,7 @@ ProgressDialog::ProgressDialog(MainWindow *parent) : QDialog(parent), ui(new Ui:
 
 void ProgressDialog::Finish()
 {
-    QMessageBox *resultMsg = new QMessageBox(this);
+    QMessageBox resultMsg;
 
     ui->progressBar->setMaximum(100);
     if (ripper->exitCode() == 0)
@@ -64,39 +67,39 @@ void ProgressDialog::Finish()
     {
         ui->label->setText("An error occurred while extracting!");
         ui->progressBar->setValue(0);
-        resultMsg->setIcon(QMessageBox::Critical);
+        resultMsg.setIcon(QMessageBox::Critical);
 
         switch (ripper->exitCode())
         {
         case -1:
-            resultMsg->setText("Invalid arguments passed to gba_mus_ripper!");
+            resultMsg.setText("Invalid arguments passed to gba_mus_ripper!");
             break;
 
         case -2:
-            resultMsg->setText("Unable to open file \"" + romPath + "\" for reading!");
+            resultMsg.setText("Unable to open file \"" + romPath + "\" for reading!");
             break;
 
         case -3:
-            resultMsg->setText("Invalid song table address specified.");
+            resultMsg.setText("Invalid song table address specified.");
             break;
 
         case -4:
-            resultMsg->setText("No sound engine was found. This ROM may not use the 'Sappy' sound engine.");
+            resultMsg.setText("No sound engine was found. This ROM may not use the 'Sappy' sound engine.");
             break;
 
         case -5:
-            resultMsg->setText("Invalid offset within GBA ROM.");
+            resultMsg.setText("Invalid offset within GBA ROM.");
             break;
 
         case -6:
-            resultMsg->setText("Song table address is outside the bounds of the ROM.");
+            resultMsg.setText("Song table address is outside the bounds of the ROM.");
             break;
 
         case -7:
-            resultMsg->setText("Unable to parse song table.");
+            resultMsg.setText("Unable to parse song table.");
             break;
         }
-        resultMsg->exec();
+        resultMsg.exec();
     }
 
     close();

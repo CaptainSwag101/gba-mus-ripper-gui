@@ -24,31 +24,31 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_startButton_clicked()
 {
-    if (!QFileInfo(QDir::currentPath() + '/' + "gba_mus_ripper.exe").exists())
+    if (!QFileInfo(QDir::currentPath() + '/' + "gba_mus_ripper").exists() && !QFileInfo(QDir::currentPath() + '/' + "gba_mus_ripper.exe").exists())
     {
-        QMessageBox *errorMsg = new QMessageBox(this);
-        errorMsg->setIcon(QMessageBox::Critical);
-        errorMsg->setText("Unable to find the \"gba_mus_ripper.exe\" executable in this program's directory.\n"
+        QMessageBox errorMsg;
+        errorMsg.setIcon(QMessageBox::Critical);
+        errorMsg.setText("Unable to find the \"gba_mus_ripper\" executable in this program's directory.\n"
                           "Unable to extract music.");
-        errorMsg->exec();
+        errorMsg.exec();
     }
     else if (ui->romPathEdit->text().isEmpty())
     {
-        QMessageBox *errorMsg = new QMessageBox(this);
-        errorMsg->setIcon(QMessageBox::Critical);
+        QMessageBox errorMsg;
+        errorMsg.setIcon(QMessageBox::Critical);
         if (ui->outputPathEdit->text().isEmpty())
-            errorMsg->setText("No GBA ROM or output path specified.");
+            errorMsg.setText("No GBA ROM or output path specified.");
         else
-            errorMsg->setText("No GBA ROM specified.");
+            errorMsg.setText("No GBA ROM specified.");
 
-        errorMsg->exec();
+        errorMsg.exec();
     }
     else if (ui->outputPathEdit->text().isEmpty())
     {
-        QMessageBox *errorMsg = new QMessageBox(this);
-        errorMsg->setIcon(QMessageBox::Critical);
-        errorMsg->setText("No output path specified.");
-        errorMsg->exec();
+        QMessageBox errorMsg;
+        errorMsg.setIcon(QMessageBox::Critical);
+        errorMsg.setText("No output path specified.");
+        errorMsg.exec();
     }
     else
     {

@@ -27,17 +27,11 @@ public:
     QString address;
 
 private slots:
-
     void on_startButton_clicked();
-
     void on_chooseRomButton_clicked();
-
     void on_chooseOutputButton_clicked();
-
     void on_manualAddressEnable_stateChanged();
-
     void on_actionExit_triggered();
-
     void on_actionAbout_triggered();
 
 private:

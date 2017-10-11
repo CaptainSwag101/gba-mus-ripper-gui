@@ -1,8 +1,3 @@
-# Build directories
-
-[Dd]ebug/
-[Rr]elease/
-
 # C++ objects and libs
 
 *.slo
@@ -17,6 +12,9 @@
 
 # Qt-es
 
+object_script.*.Release
+object_script.*.Debug
+*_plugin_import.cpp
 /.qmake.cache
 /.qmake.stash
 *.pro.user
@@ -25,55 +23,36 @@
 *.qbs.user.*
 *.moc
 moc_*.cpp
+moc_*.h
 qrc_*.cpp
 ui_*.h
+*.qmlc
+*.jsc
 Makefile*
-*-build-*
-object_script.*
+*build-*
+
+# Qt unit tests
+target_wrapper.*
 
 # QtCreator
 
 *.autosave
 
-#QtCtreator Qml
+# QtCtreator Qml
 *.qmlproject.user
 *.qmlproject.user.*
 
-# =========================
-# Operating System Files
-# =========================
+# QtCtreator CMake
+CMakeLists.txt.user*
 
-# OSX
-# =========================
 
-.DS_Store
-.AppleDouble
-.LSOverride
-
-# Thumbnails
-._*
-
-# Files that might appear in the root of a volume
-.DocumentRevisions-V100
-.fseventsd
-.Spotlight-V100
-.TemporaryItems
-.Trashes
-.VolumeIcon.icns
-
-# Directories potentially created on remote AFP share
-.AppleDB
-.AppleDesktop
-Network Trash Folder
-Temporary Items
-.apdisk
-
-# Windows
-# =========================
-
-# Windows image file caches
+# Windows thumbnail cache files
 Thumbs.db
 ehthumbs.db
+ehthumbs_vista.db
+
+# Dump file
+*.stackdump
 
 # Folder config file
 Desktop.ini

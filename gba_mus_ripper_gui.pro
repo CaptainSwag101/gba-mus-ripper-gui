@@ -5,7 +5,7 @@
 #-------------------------------------------------
 
 QT       += core gui
-VERSION = 0.1.1
+VERSION = 0.1.2
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -29,6 +29,6 @@ FORMS    += mainwindow.ui \
 DISTFILES += \
     goldensun_synth.raw \
     psg_data.raw \
-    GBA_Mus_Ripper.ico
+    Resources/GBA_Mus_Ripper.ico
 
-win32:RC_ICONS += GBA_Mus_Ripper.ico
+win32:RC_ICONS += Resources/GBA_Mus_Ripper.ico
