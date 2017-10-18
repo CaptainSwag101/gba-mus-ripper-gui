@@ -80,14 +80,19 @@ void MainWindow::on_chooseRomButton_clicked()
     else
         initialPath = QDir::currentPath();
 
-    result = openRom.getOpenFileName(this, tr("Choose a GBA ROM"), initialPath, "GBA ROMs (*.gba)");
+    result = QDir::toNativeSeparators(openRom.getOpenFileName(this, tr("Choose a GBA ROM"), initialPath, "GBA ROMs (*.gba)"));
 
     if (!result.isEmpty())
     {
         ui->romPathEdit->setText(result);
 
         if (ui->outputPathEdit->text().isEmpty())
-            ui->outputPathEdit->setText(QFileInfo(result).absolutePath());
+        {
+            QString outPath = QFileInfo(result).absoluteFilePath();
+            outPath.truncate(outPath.length() - (QFileInfo(result).suffix().length() + 1));
+            ui->outputPathEdit->setText(QDir::toNativeSeparators(outPath));
+            ui->startButton->setFocus();
+        }
     }
 }
 
@@ -104,7 +109,7 @@ void MainWindow::on_chooseOutputButton_clicked()
     else
         initialPath = QDir::currentPath();
 
-    result = openOutput.getExistingDirectory(this, tr("Choose output directory"), initialPath, QFileDialog::ShowDirsOnly);
+    result = QDir::toNativeSeparators(openOutput.getExistingDirectory(this, tr("Choose output directory"), initialPath, QFileDialog::ShowDirsOnly));
 
     if (!result.isEmpty())
     {
@@ -124,6 +129,6 @@ void MainWindow::on_actionExit_triggered()
 
 void MainWindow::on_actionAbout_triggered()
 {
-    AboutDialog *about = new AboutDialog(this);
-    about->exec();
+    AboutDialog about;
+    about.exec();
 }

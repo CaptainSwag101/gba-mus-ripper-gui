@@ -13,9 +13,9 @@ ProgressDialog::ProgressDialog(MainWindow *parent) : QDialog(parent), ui(new Ui:
     outPath = parent->outputPath;
 
     QStringList args;
-    args.append('"' + romPath + '"');
+    args.append(romPath);
     args.append("-o");
-    args.append('"' + outPath + '"');
+    args.append(outPath);
 
     if (parent->gmFlag)
         args.append("-gm");
@@ -43,12 +43,13 @@ ProgressDialog::ProgressDialog(MainWindow *parent) : QDialog(parent), ui(new Ui:
 
     connect(ripper, SIGNAL(finished(int, QProcess::ExitStatus)), this, SLOT(Finish()));
     ripper->start();
+
 }
 
 void ProgressDialog::Finish()
 {
     QMessageBox resultMsg;
-
+    qDebug() << QString(ripper->readAll());
     ui->progressBar->setMaximum(100);
     if (ripper->exitCode() == 0)
     {

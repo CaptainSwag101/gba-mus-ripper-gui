@@ -1,6 +1,7 @@
 #ifndef PROGRESSDIALOG_H
 #define PROGRESSDIALOG_H
 
+#include <QDebug>
 #include <QDesktopServices>
 #include <QDialog>
 #include <QDir>
