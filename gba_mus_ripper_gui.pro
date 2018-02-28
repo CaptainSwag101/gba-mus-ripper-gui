@@ -5,7 +5,7 @@
 #-------------------------------------------------
 
 QT       += core gui
-VERSION = 0.1.2
+VERSION = 0.1.3
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -15,15 +15,12 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    progressdialog.cpp \
     aboutdialog.cpp
 
 HEADERS  += mainwindow.h \
-    progressdialog.h \
     aboutdialog.h
 
 FORMS    += mainwindow.ui \
-    progressdialog.ui \
     aboutdialog.ui
 
 DISTFILES += \

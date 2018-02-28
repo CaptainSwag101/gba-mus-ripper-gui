@@ -2,6 +2,9 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QFutureWatcher>
+#include <QProgressDialog>
+#include <QtConcurrent/QtConcurrent>
 
 namespace Ui {
 class MainWindow;
@@ -14,17 +17,6 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
-
-    QString romPath;
-    QString outputPath;
-
-    bool gmFlag;
-    bool xgFlag;
-    bool rcFlag;
-    bool sbFlag;
-    bool rawFlag;
-    bool adrFlag;
-    QString address;
 
 private slots:
     void on_startButton_clicked();
